@@ -1,0 +1,155 @@
+[
+  {
+    "ticker": "PTBA",
+    "nama": "Bukit Asam Tbk",
+    "sektor": "Batu Bara",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dividen final tahunan (1x/tahun); ex-date umumnya April–Juni, pembayaran Mei–Juli. Tidak ada interim/special 2020–2025.",
+    "sumber": ["https://stockanalysis.com/quote/idx/PTBA/dividend/", "https://www.investing.com/equities/tb-bukit-asam-dividends"]
+  },
+  {
+    "ticker": "ITMG",
+    "nama": "Indo Tambangraya Megah Tbk",
+    "sektor": "Batu Bara",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dua kali/tahun: final ~April, interim ~September–November. Dideklarasikan dalam USD, dibayar IDR.",
+    "sumber": ["https://stockanalysis.com/quote/idx/ITMG/dividend/"]
+  },
+  {
+    "ticker": "UNTR",
+    "nama": "United Tractors Tbk",
+    "sektor": "Alat Berat / Batu Bara",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dua kali/tahun: interim ~awal Oktober (bayar ~24 Okt) + final ~April–Mei.",
+    "sumber": ["https://stockanalysis.com/quote/idx/UNTR/dividend/"]
+  },
+  {
+    "ticker": "ANTM",
+    "nama": "Aneka Tambang Tbk",
+    "sektor": "Tambang Logam",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dividen final tahunan, ex-date ~Apr–Jun, bayar ~Mei–Juli. Payout naik (35%→50%→100%). Tidak ada stock split 2020–2025.",
+    "sumber": ["https://www.investing.com/equities/aneka-tambang-dividends"]
+  },
+  {
+    "ticker": "ADRO",
+    "nama": "Alamtri Resources Indonesia Tbk (d/h Adaro Energy)",
+    "sektor": "Batu Bara / Energi",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": true },
+    "pola_pembayaran": "Dua kali/tahun: interim (cum ~akhir Des, bayar ~pertengahan Jan) + final (~Mei/Juni). Deklarasi USD, dibayar IDR (kurs tengah BI). Des 2024 ada dividen SPESIAL jumbo Rp1.358/saham terkait listing anak usaha AADI.",
+    "sumber": ["https://stockanalysis.com/quote/idx/ADRO/dividend/", "https://www.investing.com/equities/adaro-energy-t-dividends", "https://www.alamtri.com/pages/read/10/44/Dividend%20Information"]
+  },
+  {
+    "ticker": "HRUM",
+    "nama": "Harum Energy Tbk",
+    "sektor": "Batu Bara / Nikel",
+    "papan": "Utama",
+    "flags": { "dormant": true, "special_history": false },
+    "pola_pembayaran": "Tidak teratur. Bagi 2021, 2022, interim Des 2022 — lalu DORMAN (absen 2023, 2024, 2025) demi capex nikel. Stock split 1:5 (Jun 2022).",
+    "sumber": ["https://stockanalysis.com/quote/idx/HRUM/dividend/", "https://investasi.kontan.co.id/news/harum-energy-hrum-absen-bagikan-dividen-ini-alasannya"]
+  },
+  {
+    "ticker": "INDY",
+    "nama": "Indika Energy Tbk",
+    "sektor": "Batu Bara / Energi",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Tidak teratur (~25% payout), deklarasi USD dibayar IDR. Bagi 2020, skip 2021, lalu resume 2022 (interim+final), 2023, 2024, 2025.",
+    "sumber": ["https://stockanalysis.com/quote/idx/INDY/dividend/"]
+  },
+  {
+    "ticker": "BBRI",
+    "nama": "Bank Rakyat Indonesia (Persero) Tbk",
+    "sektor": "Perbankan",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Sejak tahun buku 2022: dua kali/tahun — interim (~Des, bayar ~Jan) + final (~Mar–Apr). Sebelumnya 1x/tahun. Payout tinggi (60–85%+).",
+    "sumber": ["https://stockanalysis.com/quote/idx/BBRI/dividend/", "https://www.investing.com/equities/bank-rakyat-in-dividends"]
+  },
+  {
+    "ticker": "BMRI",
+    "nama": "Bank Mandiri (Persero) Tbk",
+    "sektor": "Perbankan",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dividen final tahunan (~Feb–Apr), payout ~60% (78% utk TB2024). Stock split 1:2 efektif 4 Apr 2023. Interim pertama baru TB2025 (di luar 2020–2025).",
+    "sumber": ["https://www.investing.com/equities/bank-mandiri-t-dividends", "https://stockanalysis.com/quote/idx/BMRI/dividend/"]
+  },
+  {
+    "ticker": "BBNI",
+    "nama": "Bank Negara Indonesia (Persero) Tbk",
+    "sektor": "Perbankan",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dividen final tahunan (~Mar–Apr). Payout naik 25%→65%. Stock split 1:2 efektif 6 Okt 2023 (DPS 2024+ basis pasca-split).",
+    "sumber": ["https://www.bni.co.id/id-id/investor/informasi-saham-obligasi/dividen", "https://www.investing.com/equities/bank-bni-tbk-dividends"]
+  },
+  {
+    "ticker": "BJBR",
+    "nama": "Bank Pembangunan Daerah Jawa Barat dan Banten Tbk",
+    "sektor": "Perbankan",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dividen final tahunan (RUPST awal April; ex ~April; bayar ~April–Mei). BPD high-yield (~6–10%).",
+    "sumber": ["https://www.investing.com/equities/bank-p-jawa-ba-dividends", "https://ir.bankbjb.co.id/page/dividen"]
+  },
+  {
+    "ticker": "BJTM",
+    "nama": "Bank Pembangunan Daerah Jawa Timur Tbk",
+    "sektor": "Perbankan",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dividen final tahunan (jadwal RUPST bergeser Feb–Jun). BPD high-yield (~7–9%). DPS naik konsisten.",
+    "sumber": ["https://stockanalysis.com/quote/idx/BJTM/dividend/"]
+  },
+  {
+    "ticker": "ASII",
+    "nama": "Astra International Tbk",
+    "sektor": "Konglomerat",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Dua kali/tahun: interim ~Oktober (bayar 27–31 Okt) + final ~Mei. Payout ~40%.",
+    "sumber": ["https://stockanalysis.com/quote/idx/ASII/dividend/", "https://www.investing.com/equities/astra-intl-tbk-dividends"]
+  },
+  {
+    "ticker": "TLKM",
+    "nama": "Telkom Indonesia (Persero) Tbk",
+    "sektor": "Telekomunikasi",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": true },
+    "pola_pembayaran": "Dividen final tahunan (~Mei–Juli), tanpa interim. Pernah ada komponen dividen SPESIAL untuk tahun buku 2019 (dibayar 2020).",
+    "sumber": ["https://www.telkom.co.id/sites/hubungan-investor/id_ID/page/kebijakan-dividen-224"]
+  },
+  {
+    "ticker": "HMSP",
+    "nama": "HM Sampoerna Tbk",
+    "sektor": "Konsumer (Rokok)",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Satu dividen final/tahun (~Mei–Juni), payout sangat tinggi (~98–106%). DPS cenderung menurun.",
+    "sumber": ["https://www.investing.com/equities/h-m-sampoerna-dividends"]
+  },
+  {
+    "ticker": "GGRM",
+    "nama": "Gudang Garam Tbk",
+    "sektor": "Konsumer (Rokok)",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Satu dividen final/tahun (~Juli). Pernah SKIP dividen (tahun buku 2019 → tidak bayar 2020; tahun buku 2023 → tidak bayar 2024). DPS menurun tajam.",
+    "sumber": ["https://stockanalysis.com/quote/idx/GGRM/dividend/", "https://www.investing.com/equities/gudang-garam-t-dividends"]
+  },
+  {
+    "ticker": "INDF",
+    "nama": "Indofood Sukses Makmur Tbk",
+    "sektor": "Konsumer",
+    "papan": "Utama",
+    "flags": { "dormant": false, "special_history": false },
+    "pola_pembayaran": "Satu dividen final/tahun, RUPST ~Jun–Agu, bayar ~Jul–Sep. Tanpa interim/special.",
+    "sumber": ["https://www.indofood.com/investor-relation/dividend-history", "https://www.investing.com/equities/indofood-s-m-t-dividends"]
+  }
+]
