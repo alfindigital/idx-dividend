@@ -1,5 +1,9 @@
 # Dividen IDX — History & Kalender
 
+> 📋 **Melanjutkan proyek ini (atau dari akun/sesi Claude baru)?** Baca **[`HANDOFF.md`](HANDOFF.md)** dulu —
+> berisi arsitektur, skema data, metodologi kurasi, history Fase 1–4, dan daftar pekerjaan berikutnya.
+> Knowledge/plan mentah ada di [`docs/PLAN-HISTORY.md`](docs/PLAN-HISTORY.md).
+
 Webapp interaktif untuk melihat **riwayat dividen ~5 tahun terakhir** emiten IDX berdividen
 besar, menilai **konsistensi waktu & jumlah** pembayaran, dan melihat **kalender perkiraan**
 kapan dividen berikutnya kemungkinan dibagikan (tanggal saja — bukan estimasi jumlah).
@@ -12,9 +16,10 @@ kapan dividen berikutnya kemungkinan dibagikan (tanggal saja — bukan estimasi 
   grafik dividen/tahun, skor konsistensi & tren, perkiraan jadwal, dan **tautan sumber per event**.
 - **Kalender**: tampilan bulanan event ex-dividend historis + perkiraan tanggal berikutnya.
 
-## Cakupan data (rilis awal — 17 emiten)
-PTBA, ITMG, UNTR, ADRO, ANTM, HRUM, INDY, BBRI, BMRI, BBNI, BJBR, BJTM, ASII, TLKM, HMSP,
-GGRM, INDF. Periode pembayaran 2020–2025.
+## Cakupan data (50 emiten)
+50 emiten high-dividend lintas sektor (perbankan, batu bara/energi, logam, telko/menara, konsumer,
+rokok, semen, otomotif, poultry, ritel, jalan tol, dll.), 364 event, periode pembayaran 2020–2025.
+Daftar lengkap & status per emiten ada di [`HANDOFF.md`](HANDOFF.md) §9.
 
 ## Sumber data & disclaimer
 Data dirangkum dari sumber publik (IDX, CNBC Indonesia, Bisnis, Kontan, Bareksa, Liputan6,
