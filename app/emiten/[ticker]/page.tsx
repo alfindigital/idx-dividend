@@ -9,12 +9,14 @@ import {
   predictNext,
   sortByDateDesc,
   ttmDividend,
+  eventDate,
 } from "@/lib/derive";
 import DividendChart from "@/components/DividendChart";
 import DividendTimeline from "@/components/DividendTimeline";
 import LiveYield from "@/components/LiveYield";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
-import { BULAN_ID } from "@/lib/format";
+import { gcalUrl } from "@/lib/ics";
+import { BULAN_ID, labelTipe, formatRupiah, formatTanggal } from "@/lib/format";
 
 export const revalidate = 43200;
 export const dynamicParams = false;
@@ -45,6 +47,34 @@ export default function Page({ params }: { params: { ticker: string } }) {
   const sorted = sortByDateDesc(divs);
   const lastYield = sorted.find((d) => d.yield_pct != null)?.yield_pct ?? null;
   const ttm = ttmDividend(divs);
+
+  // Event terdekat untuk tombol "Tambah ke Google Calendar":
+  // utamakan event terumumkan yang belum lewat, jika tak ada pakai perkiraan terdekat.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const nextAnnounced = sorted
+    .map((d) => ({ d, iso: eventDate(d) }))
+    .filter((x) => x.iso != null && x.iso >= todayIso)
+    .sort((a, b) => a.iso!.localeCompare(b.iso!))[0];
+  let nextCal: { title: string; dateIso: string; details: string } | null = null;
+  if (nextAnnounced) {
+    const d = nextAnnounced.d;
+    const t = labelTipe(d.tipe).toLowerCase();
+    nextCal = {
+      title: `${emiten.ticker} ex-dividen ${t}${d.dps_idr != null ? " " + formatRupiah(d.dps_idr) : ""}`,
+      dateIso: nextAnnounced.iso!,
+      details:
+        `Dividen ${t} ${emiten.nama}.` +
+        (d.cum_date ? ` Cum-date ${formatTanggal(d.cum_date)} (beli sebelum tanggal ini).` : "") +
+        ` Lihat https://idx-dividend.vercel.app/emiten/${emiten.ticker}`,
+    };
+  } else if (!emiten.flags.dormant && preds.length > 0) {
+    const p = preds[0];
+    nextCal = {
+      title: `${emiten.ticker} ex-dividen ${labelTipe(p.tipe).toLowerCase()} (perkiraan)`,
+      dateIso: p.perkiraan,
+      details: `Perkiraan ex-date berbasis pola historis (keyakinan ${p.confidence}). Bukan kepastian.`,
+    };
+  }
 
   return (
     <div className="space-y-6">
@@ -114,6 +144,33 @@ export default function Page({ params }: { params: { ticker: string } }) {
           Perkiraan berbasis pola historis. Jumlah dividen TIDAK diprediksi (tergantung kinerja &
           keputusan RUPS). Bukan saran investasi.
         </p>
+      </section>
+
+      {/* ekspor kalender */}
+      <section className="rounded-lg border border-slate-200 bg-white p-4">
+        <h2 className="text-sm font-semibold text-slate-800">📅 Ekspor ke kalender</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Tambahkan jadwal dividen {emiten.ticker} (yang sudah diumumkan + perkiraan) ke kalendermu,
+          lengkap dengan pengingat 1 hari sebelum ex-date.
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          <a
+            href={`/api/ics?ticker=${emiten.ticker}`}
+            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          >
+            ⬇️ Unduh .ics (Apple / Outlook / Google)
+          </a>
+          {nextCal && (
+            <a
+              href={gcalUrl(nextCal)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded-md border border-brand/30 bg-brand/5 px-3 py-1.5 text-sm font-medium text-brand-dark hover:bg-brand/10"
+            >
+              📅 Tambah jadwal terdekat ke Google Calendar
+            </a>
+          )}
+        </div>
       </section>
 
       {/* grafik */}
