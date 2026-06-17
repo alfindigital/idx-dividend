@@ -34,6 +34,7 @@ function predLabel(dateIso: string | null, bulanLabel: string | null): string {
 export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [prices, setPrices] = useState<Record<string, number | null>>({});
   const [priceState, setPriceState] = useState<"loading" | "ok" | "fail">("loading");
+  const [updatedTs, setUpdatedTs] = useState<number | null>(null);
   const [q, setQ] = useState("");
   const [sektor, setSektor] = useState("");
   const [onlyDormant, setOnlyDormant] = useState(false);
@@ -42,19 +43,36 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   useEffect(() => {
     const tickers = rows.map((r) => r.ticker).join(",");
     if (!tickers) return;
-    fetch(`/api/price?tickers=${tickers}`)
-      .then((r) => r.json())
-      .then((d) => {
-        const map: Record<string, number | null> = {};
-        let any = false;
-        for (const p of d.prices ?? []) {
-          map[p.ticker] = p.price;
-          if (p.price != null) any = true;
-        }
-        setPrices(map);
-        setPriceState(any ? "ok" : "fail");
-      })
-      .catch(() => setPriceState("fail"));
+    let alive = true;
+    const load = () => {
+      fetch(`/api/price?tickers=${tickers}`)
+        .then((r) => r.json())
+        .then((d) => {
+          if (!alive) return;
+          const map: Record<string, number | null> = {};
+          let any = false;
+          for (const p of d.prices ?? []) {
+            map[p.ticker] = p.price;
+            if (p.price != null) any = true;
+          }
+          setPrices(map);
+          setPriceState(any ? "ok" : "fail");
+          setUpdatedTs(d.ts ?? Date.now());
+        })
+        .catch(() => {
+          if (alive) setPriceState("fail");
+        });
+    };
+    load();
+    // refresh otomatis tiap 15 menit + saat tab kembali difokus → harga selalu segar
+    const id = setInterval(load, 15 * 60 * 1000);
+    const onFocus = () => load();
+    window.addEventListener("focus", onFocus);
+    return () => {
+      alive = false;
+      clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+    };
   }, [rows]);
 
   const sectors = useMemo(() => Array.from(new Set(rows.map((r) => r.sektor))).sort(), [rows]);
@@ -132,7 +150,13 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
         </label>
         <span className="text-xs text-slate-400 ml-auto">
           {priceState === "loading" && "memuat harga…"}
-          {priceState === "ok" && "yield = berjalan (harga terkini)"}
+          {priceState === "ok" &&
+            `yield = berjalan (harga terkini${
+              updatedTs
+                ? " · diperbarui " +
+                  new Date(updatedTs).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+                : ""
+            })`}
           {priceState === "fail" && "harga live tak tersedia — yield = data terakhir"}
         </span>
       </div>
