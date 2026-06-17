@@ -18,7 +18,7 @@ kapan dividen berikutnya kemungkinan dibagikan (tanggal saja — bukan estimasi 
 
 ## Cakupan data (50 emiten)
 50 emiten high-dividend lintas sektor (perbankan, batu bara/energi, logam, telko/menara, konsumer,
-rokok, semen, otomotif, poultry, ritel, jalan tol, dll.), 364 event, periode pembayaran 2020–2025.
+rokok, semen, otomotif, poultry, ritel, jalan tol, dll.), 410 event, periode pembayaran 2020–2026.
 Daftar lengkap & status per emiten ada di [`HANDOFF.md`](HANDOFF.md) §9.
 
 ## Sumber data & disclaimer

@@ -331,3 +331,27 @@ dan **TIDAK** mengubah tanggal prediksi pembayar tahunan; tujuannya akurasi **hi
 - Catatan ekspektasi: prediksi pembayar tahunan tetap menunjuk tahun depan (benar). Static page → prediksi
   dihitung saat **build/redeploy** (bukan harian); refresh terjadi otomatis tiap deploy.
 - Commit → push `claude/confident-wright-vdij8p` → fast-forward `main` → Vercel auto-redeploy.
+
+---
+
+# ✅ FASE 5 SELESAI (2026-06-17) — Refresh data ke tahun pembayaran 2026
+
+Dikerjakan di branch `claude/practical-lovelace-d59jsb`. **46 event tahun pembayaran 2026 ditambahkan** (4 interim:
+BBRI Rp137, BMRI Rp100, ADRO Rp145,14, BSSR Rp127,41 — semua dibayar Jan 2026; + 42 final FY2025 dibayar Apr–Jul 2026)
+dari **42 emiten** → total **410 event**. Metodologi: 6 agen riset paralel per klaster sektor (Bank, Batu bara, Energi/Logam,
+Telko/Semen, Konsumer, Poultry/Astra), ≥2 sumber per event, USD-declared pakai konversi IDR resmi as-paid, jangan menebak (`null`).
+
+**Hasil per emiten (final FY2025, Rp/saham kecuali disebut):** BBRI 209 (+interim 137) · BMRI 376,96 (+interim 100) ·
+BBNI 349,41 · BBCA 281 · BJBR 85,54 · BJTM 56,62 · BRIS 32,81 · BDMN 142,19 · MEGA 171,95 · PTBA 114,508 · ITMG 992 ·
+ADRO 118,26 (+interim 145,14) · ADMR 50,32 · GEMS 237,95 · BSSR 486,13 (+interim 127,41) · PGAS 125,61 · ANTM 209,99 ·
+INCO 78,1 · TINS 88,18 · AKRA 100 · JSMR 156,2 · TLKM 222 · ISAT 111 · TOWR 6,89 · TBIG 47 · SMGR 28,33 · INTP 468 ·
+HMSP 56,3 · UNVR 114 · MYOR 60 · SIDO 15 · KLBF 20 · ULTJ 130 · AMRT 41,5 · CPIN 180 · JPFA 140 · ASII 292 · UNTR 1.096 ·
+AUTO 170. **`dps_idr=null`** (USD, kurs belum tersedia): INDY (US$0,01024875), BYAN (US$0,015), MEDC (US$0,0018).
+
+**OMIT (8):** BBTN & EXCL (tak bagi dividen FY2025), HRUM (dormant), GGRM/INDF/ICBP/MTEL/NCKL (RUPST 23–30 Jun, belum diumumkan per 17 Jun).
+`emiten.json` di-update untuk BBTN (skip 2025), EXCL (skip 2025 rugi), BMRI (interim pertama TB2025 kini dalam rentang).
+
+**Verifikasi:** JSON valid, 0 orphan/duplikat, `npm run build` sukses (55 halaman), smoke-test BBRI/PTBA/BMRI/SMGR/BYAN/BBTN HTTP 200,
+timeline & "dividen terakhir" memuat 2026, prediksi jalan. `/api/price` mengembalikan fallback `null` di sandbox (Yahoo diblokir) — normal, berfungsi di Vercel.
+
+**Follow-up (sesi berikutnya):** lihat `HANDOFF.md` §10.A — cek ulang GGRM/INDF/ICBP/MTEL/NCKL setelah RUPST akhir Juni; isi `dps_idr` INDY/BYAN/MEDC saat kurs resmi terbit; interim TB2026 (Sep–Des 2026) saat diumumkan.
