@@ -8,11 +8,13 @@ import {
   yearsPaid,
   predictNext,
   sortByDateDesc,
+  ttmDividend,
 } from "@/lib/derive";
 import DividendChart from "@/components/DividendChart";
 import DividendTimeline from "@/components/DividendTimeline";
+import LiveYield from "@/components/LiveYield";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
-import { formatPersen, BULAN_ID } from "@/lib/format";
+import { BULAN_ID } from "@/lib/format";
 
 export const revalidate = 43200;
 export const dynamicParams = false;
@@ -42,6 +44,7 @@ export default function Page({ params }: { params: { ticker: string } }) {
   const preds = predictNext(divs, emiten);
   const sorted = sortByDateDesc(divs);
   const lastYield = sorted.find((d) => d.yield_pct != null)?.yield_pct ?? null;
+  const ttm = ttmDividend(divs);
 
   return (
     <div className="space-y-6">
@@ -69,8 +72,8 @@ export default function Page({ params }: { params: { ticker: string } }) {
 
       {/* ringkasan */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Yield terakhir (tercatat)">
-          {lastYield != null ? formatPersen(lastYield) : "—"}
+        <StatCard label="Yield berjalan (TTM)">
+          <LiveYield ticker={emiten.ticker} ttm={ttm} fallbackYield={lastYield} />
         </StatCard>
         <StatCard label="Konsistensi waktu">
           <ConsistencyBadge value={timing} />
