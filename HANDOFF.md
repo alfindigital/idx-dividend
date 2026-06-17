@@ -7,8 +7,9 @@
 > - **Live:** https://idx-dividend.vercel.app/
 > - **Repo:** `alfindigital/idx-dividend`
 > - **Branch kerja:** `claude/confident-wright-vdij8p` → di-merge fast-forward ke `main`
-> - **Status (diverifikasi 2026-06-15):** 50 emiten, 364 event dividen (tahun pembayaran 2020–2025),
->   `npm run build` sukses (55 halaman), smoke-test halaman & `/api/price` OK. **Sudah live & ter-merge ke `main`.**
+> - **Status (diverifikasi 2026-06-17):** 50 emiten, **410 event** dividen (tahun pembayaran **2020–2026**),
+>   `npm run build` sukses (55 halaman), smoke-test halaman OK. **FASE 5 (refresh 2026) SELESAI** — lihat §10.A.
+>   (Status sebelumnya 2026-06-15: 364 event s/d 2025.)
 > - **Knowledge/history mentah (verbatim):** lihat [`docs/PLAN-HISTORY.md`](docs/PLAN-HISTORY.md).
 
 ---
@@ -258,7 +259,26 @@ Ini inti "knowledge" proyek — patuhi persis agar dataset tetap konsisten:
 
 ## 10. Remaining work / roadmap
 
-### A. Refresh data ke tahun pembayaran 2026 (prioritas berikutnya — DITUNDA dari sesi sebelumnya)
+### A. Refresh data ke tahun pembayaran 2026 — ✅ SELESAI (2026-06-17, commit refresh-2026)
+**46 event 2026 ditambahkan** (4 interim: BBRI, BMRI, ADRO, BSSR; 42 final) dari **42 emiten** → total 410 event.
+Riset via 6 agen paralel per klaster sektor + verifikasi silang (≥2 sumber/event, jangan menebak).
+
+**8 emiten sengaja di-OMIT (belum/tidak ada dividen yang dibayar 2026 per 17 Jun):**
+- **Tidak bagi dividen FY2025:** `BBTN` (payout 0%, RUPST 23 Apr 2026), `EXCL` (rugi bersih pasca-merger XLSMART).
+- **Masih dormant:** `HRUM` (RUPST 3 Jun 2026 putuskan tak bagi, pivot nikel).
+- **Belum RUPS/diumumkan per 17 Jun (RUPST akhir Juni):** `GGRM` (RUPST 23 Jun), `INDF` & `ICBP` (RUPST 26 Jun),
+  `MTEL` (RUPST ditunda ke 30 Jun), `NCKL` (audit FY2025 ditunda ke OJK).
+
+**3 event dengan `dps_idr = null` (deklarasi USD, kurs konversi as-paid belum tersedia per 17 Jun):**
+`INDY` (US$0,01024875/saham), `BYAN` (US$0,015/saham, kurs ditetapkan di record date 23 Jun), `MEDC` (US$0,0018/saham, record date 18 Jun).
+
+**Follow-up untuk sesi berikutnya (setelah akhir Juni 2026):**
+1. Cek ulang `GGRM`, `INDF`, `ICBP`, `MTEL`, `NCKL` setelah RUPST masing-masing (23–30 Jun) → append bila sudah umumkan.
+2. Isi `dps_idr` untuk `INDY`/`BYAN`/`MEDC` begitu nilai konversi IDR resmi (as-paid) dipublikasikan.
+3. Interim TB2026 (umumnya dibayar Sep–Des 2026) belum ada per 17 Jun — tambahkan saat sudah diumumkan.
+4. (Catatan akurasi) Beberapa interim TB2025 yang dibayar di **2025** (mis. BSSR interim US$35jt 21 Nov 2025) berada di luar scope refresh ini dan belum tentu ada di dataset 2025 — bisa dilengkapi terpisah bila diinginkan.
+
+#### (Arsip) Instruksi asli refresh 2026
 Karena sekarang sudah pertengahan 2026, banyak emiten **sudah membayar final FY2025 (Apr–Jul 2026)**.
 Tambahkan event **tahun pembayaran 2026** yang sudah terjadi/terumumkan.
 - **Hanya ubah `data/dividends.json`** (append) — kecuali ada dormant yang bangkit / pola berubah (lalu update `emiten.json`).
