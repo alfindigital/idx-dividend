@@ -34,8 +34,8 @@ export const viewport: Viewport = {
   ],
 };
 
-// Set tema sebelum paint pertama → tidak ada kedipan (flash) saat reload.
-const themeInit = `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&m)){document.documentElement.classList.add('dark');}}catch(e){}})();`;
+// Default LIGHT mode. Dark hanya bila pengguna memilihnya (tersimpan di localStorage).
+const themeInit = `(function(){try{if(localStorage.getItem('theme')==='dark'){document.documentElement.classList.add('dark');}}catch(e){}})();`;
 
 function LogoMark() {
   return (

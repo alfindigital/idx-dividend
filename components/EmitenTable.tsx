@@ -684,10 +684,10 @@ function MobileCard({
   return (
     <Link
       href={`/emiten/${r.ticker}`}
-      className="block rounded-xl border border-line bg-surface p-3 shadow-card transition hover:border-brand/40 active:bg-surface-2"
+      className="block overflow-hidden rounded-xl border border-line bg-surface p-3 shadow-card transition hover:border-brand/40 active:bg-surface-2"
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <button
               type="button"
@@ -731,21 +731,16 @@ function MobileCard({
       </div>
 
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
-        <div>
+        <div className="min-w-0">
           <div className="text-[11px] uppercase tracking-wide text-faint">Div. terakhir</div>
-          <div className="flex items-center gap-2">
-            <span className="tabular text-fg">
-              {formatRupiah(r.lastAnnualTotal)}
-              {r.lastYear ? <span className="text-faint"> · {r.lastYear}</span> : ""}
-            </span>
-            {r.dpsSeries.length >= 2 && (
-              <Sparkline data={r.dpsSeries} className={sparkColor(r.dpsSeries)} />
-            )}
+          <div className="truncate tabular text-fg">
+            {formatRupiah(r.lastAnnualTotal)}
+            {r.lastYear ? <span className="text-faint"> · {r.lastYear}</span> : ""}
           </div>
         </div>
-        <div>
+        <div className="min-w-0">
           <div className="text-[11px] uppercase tracking-wide text-faint">Ex terakhir</div>
-          <div className="text-muted">{formatTanggalSingkat(r.lastExDate)}</div>
+          <div className="truncate text-muted">{formatTanggalSingkat(r.lastExDate)}</div>
         </div>
         <div className="col-span-2">
           <div className="text-[11px] uppercase tracking-wide text-faint">Perkiraan berikutnya</div>
