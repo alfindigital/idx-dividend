@@ -15,6 +15,7 @@ import DividendChart from "@/components/DividendChart";
 import DividendTimeline from "@/components/DividendTimeline";
 import LiveYield from "@/components/LiveYield";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
+import { Card, CardLabel } from "@/components/ui/Card";
 import { gcalUrl } from "@/lib/ics";
 import { BULAN_ID, labelTipe, formatRupiah, formatTanggal } from "@/lib/format";
 
@@ -27,10 +28,10 @@ export function generateStaticParams() {
 
 function StatCard({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="text-[11px] uppercase tracking-wide text-slate-400">{label}</div>
-      <div className="mt-1 text-sm font-semibold text-slate-800">{children}</div>
-    </div>
+    <Card className="p-3">
+      <CardLabel>{label}</CardLabel>
+      <div className="mt-1 text-sm font-semibold text-fg">{children}</div>
+    </Card>
   );
 }
 
@@ -86,17 +87,17 @@ export default function Page({ params }: { params: { ticker: string } }) {
 
       <header className="space-y-2">
         <div className="flex flex-wrap items-baseline gap-2">
-          <h1 className="text-2xl font-bold text-slate-900">{emiten.ticker}</h1>
-          <span className="text-slate-500">{emiten.nama}</span>
+          <h1 className="text-2xl font-bold text-fg">{emiten.ticker}</h1>
+          <span className="text-muted">{emiten.nama}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+          <span className="rounded bg-surface-2 px-2 py-0.5 text-xs text-muted">
             {emiten.sektor}
           </span>
           <FlagBadge dormant={emiten.flags.dormant} special={emiten.flags.special_history} />
         </div>
         {emiten.pola_pembayaran && (
-          <p className="text-sm text-slate-500">Pola: {emiten.pola_pembayaran}</p>
+          <p className="text-sm text-muted">Pola: {emiten.pola_pembayaran}</p>
         )}
       </header>
 
@@ -115,17 +116,21 @@ export default function Page({ params }: { params: { ticker: string } }) {
       </section>
 
       {/* prediksi */}
-      <section className="rounded-lg border border-amber-200 bg-amber-50 p-4">
-        <h2 className="text-sm font-semibold text-amber-900">Perkiraan jadwal berikutnya</h2>
+      <section className="rounded-2xl border border-amber-300/50 bg-amber-50 p-4 dark:border-amber-400/25 dark:bg-amber-400/10">
+        <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+          Perkiraan jadwal berikutnya
+        </h2>
         {emiten.flags.dormant ? (
-          <p className="mt-1 text-sm text-amber-800">
+          <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/90">
             Emiten ini tidak membagikan dividen secara teratur belakangan ini (potensi rapel).
             Tidak ada prediksi tanggal — pantau pengumuman resmi.
           </p>
         ) : preds.length === 0 ? (
-          <p className="mt-1 text-sm text-amber-800">Data belum cukup untuk membuat perkiraan.</p>
+          <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/90">
+            Data belum cukup untuk membuat perkiraan.
+          </p>
         ) : (
-          <ul className="mt-1 space-y-1 text-sm text-amber-900">
+          <ul className="mt-1 space-y-1 text-sm text-amber-900 dark:text-amber-200/90">
             {preds.map((p, i) => {
               const d = new Date(p.perkiraan);
               return (
@@ -134,29 +139,31 @@ export default function Page({ params }: { params: { ticker: string } }) {
                   <strong>
                     {BULAN_ID[d.getMonth()]} {d.getFullYear()}
                   </strong>{" "}
-                  <span className="text-amber-600">(keyakinan {p.confidence})</span>
+                  <span className="text-amber-600 dark:text-amber-300/80">
+                    (keyakinan {p.confidence})
+                  </span>
                 </li>
               );
             })}
           </ul>
         )}
-        <p className="mt-2 text-xs text-amber-600">
-          Perkiraan berbasis pola historis. Jumlah dividen TIDAK diprediksi (tergantung kinerja &
+        <p className="mt-2 text-xs text-amber-600 dark:text-amber-300/70">
+          Perkiraan berbasis pola historis. Jumlah dividen TIDAK diprediksi (tergantung kinerja &amp;
           keputusan RUPS). Bukan saran investasi.
         </p>
       </section>
 
       {/* ekspor kalender */}
-      <section className="rounded-lg border border-slate-200 bg-white p-4">
-        <h2 className="text-sm font-semibold text-slate-800">📅 Ekspor ke kalender</h2>
-        <p className="mt-1 text-xs text-slate-500">
+      <Card className="p-4">
+        <h2 className="text-sm font-semibold text-fg">📅 Ekspor ke kalender</h2>
+        <p className="mt-1 text-xs text-muted">
           Tambahkan jadwal dividen {emiten.ticker} (yang sudah diumumkan + perkiraan) ke kalendermu,
           lengkap dengan pengingat 1 hari sebelum ex-date.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           <a
             href={`/api/ics?ticker=${emiten.ticker}`}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+            className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm font-medium text-fg transition hover:bg-line/40"
           >
             ⬇️ Unduh .ics (Apple / Outlook / Google)
           </a>
@@ -165,35 +172,39 @@ export default function Page({ params }: { params: { ticker: string } }) {
               href={gcalUrl(nextCal)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-md border border-brand/30 bg-brand/5 px-3 py-1.5 text-sm font-medium text-brand-dark hover:bg-brand/10"
+              className="inline-flex items-center gap-1 rounded-lg border border-brand/30 bg-brand/10 px-3 py-1.5 text-sm font-medium text-brand-strong transition hover:bg-brand/20"
             >
               📅 Tambah jadwal terdekat ke Google Calendar
             </a>
           )}
         </div>
-      </section>
+      </Card>
 
       {/* grafik */}
       <section>
-        <h2 className="mb-2 text-lg font-semibold text-slate-800">
-          Dividen per lembar per tahun (Rp)
-        </h2>
-        <div className="rounded-lg border border-slate-200 bg-white p-4">
+        <h2 className="mb-2 text-lg font-semibold text-fg">Dividen per lembar per tahun (Rp)</h2>
+        <Card className="p-4">
           <DividendChart data={totals} />
-        </div>
+        </Card>
       </section>
 
       {/* timeline */}
       <section>
-        <h2 className="mb-2 text-lg font-semibold text-slate-800">Riwayat lengkap</h2>
+        <h2 className="mb-2 text-lg font-semibold text-fg">Riwayat lengkap</h2>
         <DividendTimeline events={divs} />
       </section>
 
       {emiten.sumber && emiten.sumber.length > 0 && (
-        <section className="text-xs text-slate-400">
+        <section className="text-xs text-faint">
           <span className="font-medium">Sumber emiten: </span>
           {emiten.sumber.map((u, i) => (
-            <a key={i} href={u} target="_blank" rel="noopener noreferrer" className="text-brand hover:underline mr-2">
+            <a
+              key={i}
+              href={u}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mr-2 text-brand hover:underline"
+            >
               🔗 sumber {i + 1}
             </a>
           ))}

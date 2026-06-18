@@ -35,8 +35,8 @@ export default function Page() {
       </div>
 
       <header className="space-y-2">
-        <h1 className="text-2xl font-bold text-slate-900">Kalender Dividen</h1>
-        <p className="text-sm text-slate-600 max-w-3xl">
+        <h1 className="text-2xl font-bold text-fg">Kalender Dividen</h1>
+        <p className="max-w-3xl text-sm text-muted">
           Tanggal <strong>ex-dividend</strong> historis (warna solid) dan{" "}
           <strong>perkiraan</strong> tanggal berikutnya berbasis pola musiman (garis putus,
           bertanda <code>?</code>). Bulan ramai dividen biasanya Maret–Juli (final) dan
@@ -44,7 +44,7 @@ export default function Page() {
         </p>
         <a
           href="/api/ics"
-          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm font-medium text-fg transition hover:bg-line/40"
         >
           ⬇️ Unduh semua jadwal mendatang (.ics)
         </a>

@@ -2,8 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   Design tokens — light (default) & dark (.dark on <html>).
+   Disimpan sebagai channel RGB ("15 118 110") agar utility
+   Tailwind tetap bisa memakai opacity, mis. bg-brand/10.
+   ============================================================ */
 :root {
   color-scheme: light;
+
+  --bg: 247 249 251; /* latar halaman */
+  --surface: 255 255 255; /* kartu / panel */
+  --surface-2: 248 250 252; /* header tabel, input, chip */
+  --border: 226 232 240; /* garis tepi */
+  --fg: 15 23 42; /* teks utama */
+  --muted: 100 116 139; /* teks sekunder */
+  --faint: 148 163 184; /* teks tersier / caption */
+
+  --brand: 13 148 136; /* teal-600 */
+  --brand-strong: 15 118 110; /* teal-700 */
+  --accent: 217 119 6; /* amber-600 — nuansa "emas dividen" */
+
+  /* warna penuh untuk chart (Recharts) */
+  --chart-bar: #0d9488;
+  --chart-bar-to: #2dd4bf;
+  --chart-grid: #e2e8f0;
+  --chart-axis: #94a3b8;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --bg: 8 12 22;
+  --surface: 17 24 39;
+  --surface-2: 30 41 59;
+  --border: 39 51 71;
+  --fg: 226 232 240;
+  --muted: 148 163 184;
+  --faint: 100 116 139;
+
+  --brand: 45 212 191; /* teal-400 — lebih terang agar kontras di gelap */
+  --brand-strong: 94 234 212; /* teal-300 */
+  --accent: 251 191 36; /* amber-400 */
+
+  --chart-bar: #2dd4bf;
+  --chart-bar-to: #5eead4;
+  --chart-grid: #1f2a3a;
+  --chart-axis: #64748b;
 }
 
 html,
@@ -13,9 +57,17 @@ body {
 }
 
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--fg));
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* angka rata kolom */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 * {

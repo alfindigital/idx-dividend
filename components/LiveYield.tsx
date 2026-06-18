@@ -61,10 +61,16 @@ export default function LiveYield({
 
   return (
     <div>
-      <span className={running != null && running >= 6 ? "text-emerald-700" : undefined}>
+      <span
+        className={
+          running != null && running >= 6
+            ? "tabular text-emerald-600 dark:text-emerald-400"
+            : "tabular"
+        }
+      >
         {shown != null ? formatPersen(shown) : "—"}
       </span>
-      <div className="text-[10px] font-normal text-slate-400">
+      <div className="text-[10px] font-normal text-faint">
         {state === "loading" && "memuat harga…"}
         {running != null && `harga terkini Rp ${price?.toLocaleString("id-ID")}${jam ? " · " + jam : ""}`}
         {running == null && state === "ok" && ttm <= 0 && "tak ada dividen 12 bln terakhir — yield tercatat"}

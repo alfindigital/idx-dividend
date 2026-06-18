@@ -14,40 +14,42 @@ function hostname(url: string): string {
 export default function DividendTimeline({ events }: { events: DividendEvent[] }) {
   const sorted = sortByDateDesc(events);
   if (!sorted.length) {
-    return <p className="text-sm text-slate-400">Belum ada riwayat dividen.</p>;
+    return <p className="text-sm text-faint">Belum ada riwayat dividen.</p>;
   }
   return (
     <ol className="space-y-3">
       {sorted.map((e, i) => (
-        <li key={i} className="rounded-lg border border-slate-200 bg-white p-3">
+        <li key={i} className="rounded-2xl border border-line bg-surface p-3 shadow-card">
           <div className="flex flex-wrap items-center gap-2">
             <TipeBadge tipe={e.tipe} />
-            <span className="font-semibold text-slate-800">{e.tahun}</span>
+            <span className="font-semibold text-fg">{e.tahun}</span>
             <span className="ml-auto text-right">
-              <span className="text-lg font-bold text-brand-dark">{formatRupiah(e.dps_idr)}</span>
-              <span className="text-xs text-slate-400"> / lembar</span>
+              <span className="tabular text-lg font-bold text-brand-strong">
+                {formatRupiah(e.dps_idr)}
+              </span>
+              <span className="text-xs text-faint"> / lembar</span>
             </span>
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-600 sm:grid-cols-4">
+          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted sm:grid-cols-4">
             <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400">Cum date</div>
+              <div className="text-[11px] uppercase tracking-wide text-faint">Cum date</div>
               {formatTanggal(e.cum_date)}
             </div>
             <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400">Ex date</div>
+              <div className="text-[11px] uppercase tracking-wide text-faint">Ex date</div>
               {formatTanggal(e.ex_date)}
             </div>
             <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400">Pembayaran</div>
+              <div className="text-[11px] uppercase tracking-wide text-faint">Pembayaran</div>
               {formatTanggal(e.payment_date)}
             </div>
             <div>
-              <div className="text-[11px] uppercase tracking-wide text-slate-400">Yield</div>
-              {formatPersen(e.yield_pct)}
+              <div className="text-[11px] uppercase tracking-wide text-faint">Yield</div>
+              <span className="tabular">{formatPersen(e.yield_pct)}</span>
             </div>
           </div>
           {(e.notes || (e.sumber_url && e.sumber_url.length > 0)) && (
-            <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-2">
+            <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-line pt-2">
               <ConfidenceBadge value={e.confidence} />
               {e.sumber_url?.slice(0, 4).map((u, j) => (
                 <a
@@ -62,7 +64,7 @@ export default function DividendTimeline({ events }: { events: DividendEvent[] }
               ))}
             </div>
           )}
-          {e.notes && <p className="mt-1 text-xs text-slate-400">{e.notes}</p>}
+          {e.notes && <p className="mt-1 text-xs text-faint">{e.notes}</p>}
         </li>
       ))}
     </ol>

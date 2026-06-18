@@ -31,6 +31,9 @@ function predLabel(dateIso: string | null, bulanLabel: string | null): string {
   return `${bulanLabel ?? BULAN_ID_SINGKAT[d.getMonth()]} ${d.getFullYear()}`;
 }
 
+const inputClass =
+  "rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand/40";
+
 export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [prices, setPrices] = useState<Record<string, number | null>>({});
   const [priceState, setPriceState] = useState<"loading" | "ok" | "fail">("loading");
@@ -115,13 +118,9 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Cari kode / nama…"
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm w-44"
+          className={`${inputClass} w-44`}
         />
-        <select
-          value={sektor}
-          onChange={(e) => setSektor(e.target.value)}
-          className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-        >
+        <select value={sektor} onChange={(e) => setSektor(e.target.value)} className={inputClass}>
           <option value="">Semua sektor</option>
           {sectors.map((s) => (
             <option key={s} value={s}>
@@ -132,7 +131,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
         <select
           value={sortKey}
           onChange={(e) => setSortKey(e.target.value as SortKey)}
-          className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
+          className={inputClass}
         >
           <option value="yield">Urut: Yield tertinggi</option>
           <option value="next">Urut: Dividen terdekat</option>
@@ -140,21 +139,25 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
           <option value="yearsPaid">Urut: Paling konsisten (thn bayar)</option>
           <option value="ticker">Urut: Kode (A–Z)</option>
         </select>
-        <label className="flex items-center gap-1 text-sm text-slate-600">
+        <label className="flex items-center gap-1 text-sm text-muted">
           <input
             type="checkbox"
             checked={onlyDormant}
             onChange={(e) => setOnlyDormant(e.target.checked)}
+            className="accent-brand"
           />
           Hanya dorman / rapel
         </label>
-        <span className="text-xs text-slate-400 ml-auto">
+        <span className="ml-auto text-xs text-faint">
           {priceState === "loading" && "memuat harga…"}
           {priceState === "ok" &&
             `yield = berjalan (harga terkini${
               updatedTs
                 ? " · diperbarui " +
-                  new Date(updatedTs).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+                  new Date(updatedTs).toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
                 : ""
             })`}
           {priceState === "fail" && "harga live tak tersedia — yield = data terakhir"}
@@ -162,9 +165,9 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
       </div>
 
       {/* tabel */}
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-line bg-surface shadow-card">
         <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 text-slate-600">
+          <thead className="bg-surface-2 text-muted">
             <tr className="text-left">
               <th className="px-3 py-2 font-semibold">Emiten</th>
               <th className="px-3 py-2 font-semibold">Sektor</th>
@@ -178,32 +181,39 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
           </thead>
           <tbody>
             {sorted.map((r) => (
-              <tr key={r.ticker} className="border-t border-slate-100 hover:bg-slate-50">
+              <tr key={r.ticker} className="border-t border-line hover:bg-surface-2">
                 <td className="px-3 py-2">
-                  <Link href={`/emiten/${r.ticker}`} className="font-semibold text-brand-dark hover:underline">
+                  <Link
+                    href={`/emiten/${r.ticker}`}
+                    className="font-semibold text-brand-strong hover:underline"
+                  >
                     {r.ticker}
                   </Link>
-                  <div className="text-xs text-slate-500 max-w-[200px] truncate">{r.nama}</div>
+                  <div className="max-w-[200px] truncate text-xs text-muted">{r.nama}</div>
                   <div className="mt-0.5 flex flex-wrap gap-1">
                     <FlagBadge dormant={r.dormant} special={r.special} />
                   </div>
                 </td>
-                <td className="px-3 py-2 text-slate-600">{r.sektor}</td>
-                <td className="px-3 py-2 text-right font-semibold">
+                <td className="px-3 py-2 text-muted">{r.sektor}</td>
+                <td className="px-3 py-2 text-right font-semibold tabular">
                   {r.displayYield != null ? (
-                    <span className={r.displayYield >= 6 ? "text-emerald-700" : "text-slate-700"}>
+                    <span
+                      className={
+                        r.displayYield >= 6 ? "text-emerald-600 dark:text-emerald-400" : "text-fg"
+                      }
+                    >
                       {formatPersen(r.displayYield)}
                     </span>
                   ) : (
                     "—"
                   )}
                   {!r.yieldFromLive && r.displayYield != null && (
-                    <div className="text-[10px] font-normal text-slate-400">terakhir</div>
+                    <div className="text-[10px] font-normal text-faint">terakhir</div>
                   )}
                 </td>
-                <td className="px-3 py-2 text-right text-slate-700">
+                <td className="px-3 py-2 text-right text-fg tabular">
                   {formatRupiah(r.lastAnnualTotal)}
-                  {r.lastYear && <div className="text-[10px] text-slate-400">{r.lastYear}</div>}
+                  {r.lastYear && <div className="text-[10px] text-faint">{r.lastYear}</div>}
                 </td>
                 <td className="px-3 py-2">
                   <ConsistencyBadge value={r.timing} />
@@ -211,19 +221,21 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
                 <td className="px-3 py-2">
                   <TrendBadge value={r.trend} />
                 </td>
-                <td className="px-3 py-2 text-slate-600">{formatTanggalSingkat(r.lastExDate)}</td>
+                <td className="px-3 py-2 text-muted">{formatTanggalSingkat(r.lastExDate)}</td>
                 <td className="px-3 py-2">
                   {r.dormant ? (
-                    <span className="text-xs text-rose-600">tak ada pola — potensi rapel</span>
+                    <span className="text-xs text-rose-600 dark:text-rose-400">
+                      tak ada pola — potensi rapel
+                    </span>
                   ) : (
-                    <span className="text-slate-700">{predLabel(r.nextPredDate, r.nextPredLabel)}</span>
+                    <span className="text-fg">{predLabel(r.nextPredDate, r.nextPredLabel)}</span>
                   )}
                 </td>
               </tr>
             ))}
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-3 py-6 text-center text-slate-400">
+                <td colSpan={8} className="px-3 py-6 text-center text-faint">
                   Tidak ada emiten yang cocok dengan filter.
                 </td>
               </tr>
@@ -231,7 +243,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-faint">
         Klik kode emiten untuk lihat riwayat lengkap, grafik, dan sumber data.
       </p>
     </div>

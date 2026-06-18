@@ -2,7 +2,6 @@ import EmitenTable, { DashboardRow } from "@/components/EmitenTable";
 import Disclaimer from "@/components/Disclaimer";
 import { emitenList, getDividends } from "@/lib/data";
 import {
-  annualTotals,
   latestAnnual,
   ttmDividend,
   timingConsistency,
@@ -45,15 +44,15 @@ export default function Page() {
 
   return (
     <div className="space-y-5">
-      <section className="space-y-2">
-        <h1 className="text-2xl font-bold text-slate-900">
-          History & Kalender Dividen Saham IDX
+      <section className="rounded-2xl border border-line bg-surface bg-gradient-to-br from-brand/10 to-accent/10 p-5 shadow-card sm:p-6">
+        <h1 className="text-2xl font-bold text-fg sm:text-[28px]">
+          History &amp; Kalender Dividen Saham IDX
         </h1>
-        <p className="text-sm text-slate-600 max-w-3xl">
+        <p className="mt-2 max-w-3xl text-sm text-muted">
           Riwayat dividen ~5 tahun terakhir untuk emiten IDX berdividen besar, lengkap dengan
-          skor konsistensi waktu & jumlah, yield berjalan (harga terkini), dan perkiraan kapan
+          skor konsistensi waktu &amp; jumlah, yield berjalan (harga terkini), dan perkiraan kapan
           dividen berikutnya kemungkinan dibagikan. Klik kode emiten untuk detail, atau buka{" "}
-          <a href="/kalender" className="text-brand hover:underline">
+          <a href="/kalender" className="font-medium text-brand hover:underline">
             tampilan kalender
           </a>
           .
