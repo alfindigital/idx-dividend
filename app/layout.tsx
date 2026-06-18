@@ -6,6 +6,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import HeaderNav from "@/components/HeaderNav";
 import BottomNav from "@/components/BottomNav";
 import SiteFooter from "@/components/SiteFooter";
+import TopProgress from "@/components/TopProgress";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id" className={`${jakarta.variable} ${grotesk.variable}`} suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+        <TopProgress />
         <header className="sticky top-0 z-20 border-b border-line bg-bg/70 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
           <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-2.5">
             <Link href="/" className="flex items-center gap-2">

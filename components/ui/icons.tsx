@@ -185,3 +185,26 @@ export const TrendingUp = (p: IconProps) => (
     <path d="m22 7-8.5 8.5-5-5L2 17M16 7h6v6" />
   </Svg>
 );
+
+export const SlidersHorizontal = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />
+  </Svg>
+);
+
+export const Star = ({ size = 18, filled = false, ...props }: IconProps & { filled?: boolean }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth={1.75}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    {...props}
+  >
+    <path d="M12 3.2l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 16.9l-5.2 2.32.99-5.8-4.21-4.1 5.82-.85z" />
+  </svg>
+);
