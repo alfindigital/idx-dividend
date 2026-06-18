@@ -16,14 +16,12 @@ import DividendTimeline from "@/components/DividendTimeline";
 import LiveYield from "@/components/LiveYield";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
 import { Card, CardLabel } from "@/components/ui/Card";
-import InfoTip from "@/components/ui/InfoTip";
 import {
   ArrowLeft,
   Download,
   CalendarPlus,
   CalendarDays,
   BarChart3,
-  ExternalLink,
 } from "@/components/ui/icons";
 import { gcalUrl } from "@/lib/ics";
 import { BULAN_ID, labelTipe, formatRupiah, formatTanggal } from "@/lib/format";
@@ -35,25 +33,10 @@ export function generateStaticParams() {
   return allTickers().map((ticker) => ({ ticker }));
 }
 
-function StatCard({
-  label,
-  tip,
-  children,
-}: {
-  label: string;
-  tip?: React.ReactNode;
-  children: React.ReactNode;
-}) {
+function StatCard({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <Card className="p-3">
-      <div className="flex items-center gap-1">
-        <CardLabel>{label}</CardLabel>
-        {tip && (
-          <InfoTip label={label} align="left">
-            {tip}
-          </InfoTip>
-        )}
-      </div>
+      <CardLabel>{label}</CardLabel>
       <div className="mt-1 text-sm font-semibold text-fg">{children}</div>
     </Card>
   );
@@ -130,30 +113,16 @@ export default function Page({ params }: { params: { ticker: string } }) {
 
       {/* ringkasan */}
       <section className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <StatCard
-          label="Yield berjalan (TTM)"
-          tip="Total dividen 12 bulan terakhir (TTM) dibagi harga saham sekarang, dalam persen. Makin tinggi makin besar imbal hasil dividen, tapi cek juga keberlanjutannya."
-        >
+        <StatCard label="Yield berjalan (TTM)">
           <LiveYield ticker={emiten.ticker} ttm={ttm} fallbackYield={lastYield} />
         </StatCard>
-        <StatCard
-          label="Konsistensi waktu"
-          tip="Seberapa teratur emiten membagikan dividen pada periode yang mirip tiap tahun."
-        >
+        <StatCard label="Konsistensi waktu">
           <ConsistencyBadge value={timing} />
         </StatCard>
-        <StatCard
-          label="Tren jumlah"
-          tip="Arah besaran dividen per lembar dari tahun ke tahun: naik, stabil, atau turun."
-        >
+        <StatCard label="Tren jumlah">
           <TrendBadge value={trend} />
         </StatCard>
-        <StatCard
-          label="Tahun membagikan (data)"
-          tip="Berapa tahun berbeda emiten ini tercatat membagikan dividen dalam data kami (±5 tahun terakhir)."
-        >
-          {yp} tahun
-        </StatCard>
+        <StatCard label="Tahun membagikan (data)">{yp} tahun</StatCard>
       </section>
 
       {/* prediksi + ekspor berdampingan */}
@@ -238,23 +207,6 @@ export default function Page({ params }: { params: { ticker: string } }) {
         <h2 className="mb-2 font-display text-lg font-semibold text-fg">Riwayat lengkap</h2>
         <DividendTimeline events={divs} />
       </section>
-
-      {emiten.sumber && emiten.sumber.length > 0 && (
-        <section className="text-xs text-faint">
-          <span className="font-medium">Sumber emiten: </span>
-          {emiten.sumber.map((u, i) => (
-            <a
-              key={i}
-              href={u}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mr-2 inline-flex items-center gap-1 text-brand hover:underline"
-            >
-              <ExternalLink size={13} /> sumber {i + 1}
-            </a>
-          ))}
-        </section>
-      )}
     </div>
   );
 }

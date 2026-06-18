@@ -1,10 +1,9 @@
-import { formatPersen, parseDate, BULAN_ID_SINGKAT } from "@/lib/format";
+import { parseDate, BULAN_ID_SINGKAT } from "@/lib/format";
 
 export interface DashboardStats {
   emiten: number;
   events: number;
   teratur: number;
-  topYield: { ticker: string; pct: number } | null;
   nextEx: { ticker: string; date: string } | null;
   pred60: number;
 }
@@ -37,15 +36,10 @@ function shortDate(iso: string): string {
 
 export default function StatsBar({ stats }: { stats: DashboardStats }) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
       <Stat label="Emiten dipantau" value={stats.emiten} sub="saham berdividen" />
       <Stat label="Event dividen" value={stats.events} sub="tercatat ~5 tahun" />
       <Stat label="Rutin tiap tahun" value={stats.teratur} sub="emiten teratur" />
-      <Stat
-        label="Yield tertinggi"
-        value={stats.topYield ? formatPersen(stats.topYield.pct) : "-"}
-        sub={stats.topYield ? `${stats.topYield.ticker} · tercatat` : undefined}
-      />
       <Stat
         label="Ex-date terdekat"
         value={stats.nextEx ? shortDate(stats.nextEx.date) : "-"}
