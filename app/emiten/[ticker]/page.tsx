@@ -102,7 +102,7 @@ export default function Page({ params }: { params: { ticker: string } }) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl space-y-5">
       <div>
         <Link
           href="/"
@@ -119,19 +119,17 @@ export default function Page({ params }: { params: { ticker: string } }) {
           </h1>
           <span className="text-muted">{emiten.nama}</span>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded bg-surface-2 px-2 py-0.5 text-xs text-muted">
-            {emiten.sektor}
-          </span>
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="rounded bg-surface-2 px-2 py-0.5 text-muted">{emiten.sektor}</span>
           <FlagBadge dormant={emiten.flags.dormant} special={emiten.flags.special_history} />
+          {emiten.pola_pembayaran && (
+            <span className="text-muted">Pola: {emiten.pola_pembayaran}</span>
+          )}
         </div>
-        {emiten.pola_pembayaran && (
-          <p className="text-sm text-muted">Pola: {emiten.pola_pembayaran}</p>
-        )}
       </header>
 
       {/* ringkasan */}
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         <StatCard
           label="Yield berjalan (TTM)"
           tip="Total dividen 12 bulan terakhir (TTM) dibagi harga saham sekarang, dalam persen. Makin tinggi makin besar imbal hasil dividen, tapi cek juga keberlanjutannya."
@@ -158,8 +156,9 @@ export default function Page({ params }: { params: { ticker: string } }) {
         </StatCard>
       </section>
 
-      {/* prediksi */}
-      <section className="rounded-2xl border border-amber-300/50 bg-amber-50 p-4 dark:border-amber-400/25 dark:bg-amber-400/10">
+      {/* prediksi + ekspor berdampingan */}
+      <section className="grid gap-3 lg:grid-cols-2">
+      <div className="rounded-xl border border-amber-300/50 bg-amber-50 p-3.5 dark:border-amber-400/25 dark:bg-amber-400/10">
         <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
           Perkiraan jadwal berikutnya
         </h2>
@@ -191,19 +190,17 @@ export default function Page({ params }: { params: { ticker: string } }) {
           </ul>
         )}
         <p className="mt-2 text-xs text-amber-600 dark:text-amber-300/70">
-          Perkiraan berbasis pola historis. Jumlah dividen TIDAK diprediksi (tergantung kinerja &amp;
-          keputusan RUPS). Bukan saran investasi.
+          Perkiraan pola historis; jumlah tidak diprediksi. Bukan saran investasi.
         </p>
-      </section>
+      </div>
 
       {/* ekspor kalender */}
-      <Card className="p-4">
+      <Card className="p-3.5">
         <h2 className="flex items-center gap-1.5 text-sm font-semibold text-fg">
           <CalendarDays size={16} className="text-brand" /> Ekspor ke kalender
         </h2>
         <p className="mt-1 text-xs text-muted">
-          Tambahkan jadwal dividen {emiten.ticker} (yang sudah diumumkan + perkiraan) ke kalendermu,
-          lengkap dengan pengingat 1 hari sebelum ex-date.
+          Tambah jadwal + pengingat 1 hari sebelum ex-date ke kalendermu.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {nextCal && (
@@ -220,10 +217,11 @@ export default function Page({ params }: { params: { ticker: string } }) {
             href={`/api/ics?ticker=${emiten.ticker}`}
             className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-surface-2"
           >
-            <Download size={15} /> Unduh .ics (Apple / Outlook / Google)
+            <Download size={15} /> Unduh .ics
           </a>
         </div>
       </Card>
+      </section>
 
       {/* grafik */}
       <section>

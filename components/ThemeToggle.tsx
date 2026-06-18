@@ -18,8 +18,11 @@ export default function ThemeToggle() {
   }, []);
 
   function toggle() {
-    const next = !document.documentElement.classList.contains("dark");
-    document.documentElement.classList.toggle("dark", next);
+    const el = document.documentElement;
+    el.classList.add("theme-transition");
+    window.setTimeout(() => el.classList.remove("theme-transition"), 280);
+    const next = !el.classList.contains("dark");
+    el.classList.toggle("dark", next);
     try {
       localStorage.setItem("theme", next ? "dark" : "light");
     } catch {

@@ -28,31 +28,21 @@ export default function Page() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="mx-auto max-w-5xl space-y-4">
+      <div className="flex items-center justify-between gap-3">
         <Link
           href="/"
           className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
         >
           <ArrowLeft size={15} /> Kembali ke daftar
         </Link>
-      </div>
-
-      <header className="space-y-2">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-fg">Kalender Dividen</h1>
-        <p className="max-w-3xl text-sm text-muted">
-          Tanggal <strong>ex-dividend</strong> historis (warna solid) dan{" "}
-          <strong>perkiraan</strong> tanggal berikutnya berbasis pola musiman (garis putus,
-          bertanda <code>?</code>). Bulan ramai dividen biasanya Maret-Juli (final) dan
-          Oktober-Desember (interim). Klik kode untuk detail. Jumlah dividen tidak diprediksi.
-        </p>
         <a
           href="/api/ics"
-          className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-surface-2"
+          className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-brand/5"
         >
-          <Download size={15} /> Unduh semua jadwal mendatang (.ics)
+          <Download size={15} /> Unduh jadwal (.ics)
         </a>
-      </header>
+      </div>
 
       <CalendarView
         events={events}

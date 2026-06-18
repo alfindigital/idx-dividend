@@ -36,8 +36,7 @@ export default function CalendarView({
     return map;
   }, [events]);
 
-  const firstDay = new Date(y, m, 1);
-  const startWeekday = firstDay.getDay(); // 0=Min
+  const startWeekday = new Date(y, m, 1).getDay();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
 
   const cells: (number | null)[] = [];
@@ -66,77 +65,94 @@ export default function CalendarView({
     setM(t.getMonth());
   }
 
-  const monthHasEvents = events.filter((e) => {
+  const monthCount = events.filter((e) => {
     const d = new Date(e.date);
     return d.getFullYear() === y && d.getMonth() === m;
   }).length;
 
+  const navBtn =
+    "inline-flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition hover:border-brand/40 hover:text-fg";
+
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => shift(-1)}
-          aria-label="Bulan sebelumnya"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition hover:border-brand/40 hover:text-fg"
-        >
+    <div className="rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4">
+      {/* nav bulan */}
+      <div className="mb-3 flex items-center justify-between">
+        <button onClick={() => shift(-1)} aria-label="Bulan sebelumnya" className={navBtn}>
           <ChevronLeft size={18} />
         </button>
-        <div className="text-center">
-          <div className="font-display text-lg font-semibold text-fg">
-            {BULAN_ID[m]} {y}
-          </div>
-          <button onClick={goToday} className="text-xs text-brand hover:underline">
-            ke bulan ini
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-lg font-semibold text-fg sm:text-xl">
+            {BULAN_ID[m]} <span className="text-muted">{y}</span>
+          </h2>
+          <button
+            onClick={goToday}
+            className="rounded-md border border-line px-2 py-0.5 text-xs text-muted transition hover:border-brand/40 hover:text-brand"
+          >
+            Hari ini
           </button>
         </div>
-        <button
-          onClick={() => shift(1)}
-          aria-label="Bulan berikutnya"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition hover:border-brand/40 hover:text-fg"
-        >
+        <button onClick={() => shift(1)} aria-label="Bulan berikutnya" className={navBtn}>
           <ChevronRight size={18} />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-faint">
-        {HARI_ID_SINGKAT.map((h) => (
-          <div key={h}>{h}</div>
+      {/* hari */}
+      <div className="grid grid-cols-7 gap-1.5">
+        {HARI_ID_SINGKAT.map((h, i) => (
+          <div
+            key={h}
+            className={`pb-1 text-center text-[11px] font-semibold uppercase tracking-wide ${
+              i === 0 ? "text-rose-400" : "text-faint"
+            }`}
+          >
+            {h}
+          </div>
         ))}
-      </div>
 
-      <div className="grid grid-cols-7 gap-1">
         {cells.map((d, i) => {
-          if (d == null)
-            return <div key={i} className="min-h-[64px] rounded-lg bg-surface-2/40" />;
+          if (d == null) return <div key={i} className="min-h-[78px] rounded-lg" />;
           const iso = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
           const evs = byDate.get(iso) ?? [];
           const isToday = iso === todayIso;
+          const weekend = i % 7 === 0;
           return (
             <div
               key={i}
-              className={`min-h-[64px] rounded-lg border p-1 ${
-                isToday ? "border-brand bg-brand/10" : "border-line bg-surface"
+              className={`flex min-h-[78px] flex-col gap-1 rounded-lg border p-1.5 transition ${
+                isToday
+                  ? "border-brand bg-brand/5"
+                  : "border-line bg-surface hover:border-brand/30"
               }`}
             >
-              <div className="text-[11px] text-faint">{d}</div>
-              <div className="mt-0.5 space-y-0.5">
-                {evs.slice(0, 4).map((e, j) => (
+              <div
+                className={`flex h-5 w-5 items-center justify-center self-start rounded-full text-[11px] font-semibold ${
+                  isToday
+                    ? "bg-brand text-white"
+                    : weekend
+                      ? "text-rose-400"
+                      : "text-faint"
+                }`}
+              >
+                {d}
+              </div>
+              <div className="flex flex-col gap-0.5">
+                {evs.slice(0, 3).map((e, j) => (
                   <Link
                     key={j}
                     href={`/emiten/${e.ticker}`}
                     title={`${e.ticker} · ${e.tipe} (${e.kind})`}
-                    className={`block truncate rounded px-1 text-[10px] leading-tight ${
+                    className={`truncate rounded px-1 py-0.5 text-[10px] font-medium leading-tight transition ${
                       e.kind === "prediksi"
-                        ? "border border-dashed border-amber-400 text-amber-700 dark:text-amber-300"
-                        : "bg-brand/10 text-brand-strong"
+                        ? "border border-dashed border-violet-400 text-violet-600 hover:bg-violet-500/10 dark:text-violet-300"
+                        : "bg-brand/15 text-brand-strong hover:bg-brand/25"
                     }`}
                   >
                     {e.ticker}
                     {e.kind === "prediksi" ? " ?" : ""}
                   </Link>
                 ))}
-                {evs.length > 4 && (
-                  <div className="text-[10px] text-faint">+{evs.length - 4} lagi</div>
+                {evs.length > 3 && (
+                  <div className="px-1 text-[10px] text-faint">+{evs.length - 3} lagi</div>
                 )}
               </div>
             </div>
@@ -144,16 +160,14 @@ export default function CalendarView({
         })}
       </div>
 
-      {monthHasEvents === 0 && (
-        <p className="text-center text-sm text-faint">Tidak ada event dividen di bulan ini.</p>
-      )}
-
-      <div className="flex flex-wrap gap-3 text-xs text-muted">
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-brand/20" /> ex-date historis
+      {/* legenda */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-3 text-xs text-muted">
+        {monthCount === 0 && <span className="text-faint">Tidak ada event dividen bulan ini.</span>}
+        <span className="ml-auto flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded bg-brand/25" /> ex-date historis
         </span>
-        <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded border border-dashed border-amber-400" />{" "}
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block h-3 w-3 rounded border border-dashed border-violet-400" />{" "}
           perkiraan (tanda ?)
         </span>
       </div>

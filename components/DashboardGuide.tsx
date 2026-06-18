@@ -17,40 +17,36 @@ export default function DashboardGuide({ open = false }: { open?: boolean }) {
       <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-fg">
         <span className="inline-flex items-center gap-2">
           <BookOpen size={17} className="text-brand" />
-          Panduan singkat: cara membaca tabel
+          Cara membaca tabel
         </span>
         <ChevronDown size={18} className="text-faint transition group-open:rotate-180" />
       </summary>
       <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
         <Row title="Yield berjalan">
-          Total dividen 12 bulan terakhir ÷ harga saham sekarang, dalam persen. Angka{" "}
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">hijau</span> = ≥ 6%
-          (relatif tinggi). Yield tinggi belum tentu bagus, cek keberlanjutannya.
+          Dividen 12 bln terakhir ÷ harga sekarang. Angka{" "}
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400">hijau</span> = ≥ 6%.
+          Yield tinggi belum tentu bagus.
         </Row>
-        <Row title="Div. terakhir">
-          Total dividen per lembar (Rp) pada tahun pembayaran terakhir yang tercatat.
-        </Row>
+        <Row title="Div. terakhir">Total dividen per lembar (Rp) tahun pembayaran terakhir.</Row>
         <Row
           title={
             <>
               Konsistensi: <ConsistencyBadge value="Sangat teratur" />
-              <ConsistencyBadge value="Cukup teratur" />
               <ConsistencyBadge value="Tidak teratur" />
             </>
           }
         >
-          Seberapa teratur emiten membagikan dividen pada periode yang mirip tiap tahun.
+          Keteraturan waktu pembagian dividen tiap tahun.
         </Row>
         <Row
           title={
             <>
-              Tren jumlah: <TrendBadge value="Naik" />
-              <TrendBadge value="Stabil" />
+              Tren: <TrendBadge value="Naik" />
               <TrendBadge value="Turun" />
             </>
           }
         >
-          Arah besaran dividen per lembar dari tahun ke tahun.
+          Arah besaran dividen per lembar antar tahun.
         </Row>
         <Row
           title={
@@ -59,17 +55,16 @@ export default function DashboardGuide({ open = false }: { open?: boolean }) {
             </>
           }
         >
-          <strong>Dorman/rapel</strong> = jarang atau tak teratur membagikan belakangan ini.{" "}
-          <strong>Pernah spesial</strong> = pernah ada dividen tidak rutin (bonus).
+          <strong>Dorman</strong> = jarang/tak teratur membagikan. <strong>Spesial</strong> = pernah
+          dividen tidak rutin.
         </Row>
         <Row title="Perkiraan berikutnya">
-          Tebakan bulan ex-date berikutnya berdasarkan pola historis, <strong>bukan kepastian</strong>,
-          dan jumlahnya tidak diprediksi.
+          Tebakan bulan ex-date dari pola historis. Bukan kepastian; jumlah tidak diprediksi.
         </Row>
       </div>
       <p className="mt-3 border-t border-line pt-2 text-xs text-faint">
-        Istilah penting: <strong>cum-date</strong> = batas terakhir beli agar dapat dividen;{" "}
-        <strong>ex-date</strong> = mulai tanggal ini pembeli baru tidak lagi dapat dividen.
+        <strong>cum-date</strong> = batas terakhir beli agar dapat dividen; <strong>ex-date</strong> ={" "}
+        mulai tanggal ini pembeli baru tidak lagi dapat dividen.
       </p>
     </details>
   );

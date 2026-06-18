@@ -19,9 +19,11 @@ function Stat({
   sub?: string;
 }) {
   return (
-    <div className="rounded-xl border border-line bg-surface p-3 shadow-card">
+    <div className="rounded-xl border border-line bg-surface p-3 shadow-card transition hover:border-brand/40">
       <div className="text-[10.5px] font-medium uppercase tracking-wide text-faint">{label}</div>
-      <div className="mt-1 font-display text-xl font-bold tabular leading-none text-fg">{value}</div>
+      <div className="mt-1 bg-gradient-to-r from-brand to-accent bg-clip-text font-display text-xl font-bold tabular leading-none text-transparent">
+        {value}
+      </div>
       {sub ? <div className="mt-1 truncate text-[11px] text-muted">{sub}</div> : null}
     </div>
   );

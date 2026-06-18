@@ -73,9 +73,9 @@ export default function SiteFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-12 overflow-hidden border-t border-line bg-surface pb-24 sm:pb-0">
+    <footer className="relative mt-10 overflow-hidden border-t border-line bg-surface pb-20 sm:pb-0">
       <span className="afd-glow" ref={glowRef} aria-hidden="true" />
-      <div className="relative z-[1] mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+      <div className="relative z-[1] mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 py-2.5">
         <span className="afd-cr">
           © {year}
           <a

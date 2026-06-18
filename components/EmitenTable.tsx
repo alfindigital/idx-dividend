@@ -49,39 +49,48 @@ interface Col {
 
 const COLUMNS: Col[] = [
   { id: "emiten", label: "Emiten", w: 210, min: 150, sortKey: "ticker" },
-  { id: "sektor", label: "Sektor", w: 160, min: 110, sortKey: "sektor" },
+  { id: "sektor", label: "Sektor", w: 150, min: 110, sortKey: "sektor" },
   {
     id: "yield",
     label: "Yield",
+    w: 110,
+    min: 80,
+    align: "right",
+    sortKey: "yield",
+    tip: "Dividen 12 bln terakhir dibagi harga sekarang. Hijau = ≥ 6%.",
+  },
+  {
+    id: "div",
+    label: "Div.",
     w: 120,
     min: 90,
     align: "right",
-    sortKey: "yield",
-    tip: "Total dividen 12 bulan terakhir dibagi harga saham sekarang. Hijau = ≥ 6%.",
+    sortKey: "div",
+    tip: "Total dividen per lembar tahun pembayaran terakhir.",
   },
-  { id: "div", label: "Div. terakhir", w: 130, min: 100, align: "right", sortKey: "div" },
   {
     id: "konsistensi",
-    label: "Konsistensi",
-    w: 150,
-    min: 120,
-    tip: "Seberapa teratur emiten membagikan dividen pada periode yang mirip tiap tahun.",
+    label: "Konsist.",
+    w: 130,
+    min: 100,
+    tip: "Keteraturan waktu pembagian dividen tiap tahun.",
   },
+  { id: "tren", label: "Tren", w: 120, min: 90, tip: "Arah besaran dividen per lembar antar tahun." },
   {
-    id: "tren",
-    label: "Tren jumlah",
-    w: 140,
-    min: 120,
-    tip: "Arah besaran dividen per lembar dari tahun ke tahun: naik, stabil, atau turun.",
+    id: "ex",
+    label: "Ex",
+    w: 110,
+    min: 80,
+    sortKey: "lastEx",
+    tip: "Tanggal ex-dividend terakhir yang tercatat.",
   },
-  { id: "ex", label: "Ex terakhir", w: 130, min: 100, sortKey: "lastEx" },
   {
     id: "pred",
-    label: "Perkiraan berikutnya",
-    w: 170,
-    min: 130,
+    label: "Perkiraan",
+    w: 140,
+    min: 110,
     sortKey: "next",
-    tip: "Tebakan bulan ex-date berikutnya berdasarkan pola historis, bukan kepastian.",
+    tip: "Perkiraan bulan ex-date berikutnya (pola historis, bukan kepastian).",
   },
 ];
 
@@ -92,8 +101,10 @@ const SORT_PRESETS: { value: string; label: string }[] = [
   { value: "div:desc", label: "Dividen terbesar" },
   { value: "yearsPaid:desc", label: "Paling konsisten" },
   { value: "ticker:asc", label: "Kode A-Z" },
-  { value: "sektor:asc", label: "Sektor A-Z" },
 ];
+
+const PAGE = 20;
+const STORAGE_KEY = "idx-colfrac-v1";
 
 function predLabel(dateIso: string | null, bulanLabel: string | null): string {
   if (!dateIso) return "-";
@@ -105,7 +116,10 @@ function defaultDir(key: SortKey): Dir {
   return key === "ticker" || key === "sektor" || key === "next" ? "asc" : "desc";
 }
 
-const STORAGE_KEY = "idx-colw-v1";
+const DEFAULT_FRACS = (() => {
+  const t = COLUMNS.reduce((a, c) => a + c.w, 0);
+  return COLUMNS.map((c) => c.w / t);
+})();
 
 export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [prices, setPrices] = useState<Record<string, number | null>>({});
@@ -115,14 +129,16 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [sektors, setSektors] = useState<string[]>([]);
   const [onlyDormant, setOnlyDormant] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "yield", dir: "desc" });
-  const [widths, setWidths] = useState<number[]>(() => COLUMNS.map((c) => c.w));
+  const [fracs, setFracs] = useState<number[]>(DEFAULT_FRACS);
+  const [visible, setVisible] = useState(PAGE);
+  const tableRef = useRef<HTMLTableElement>(null);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const arr = JSON.parse(raw);
-        if (Array.isArray(arr) && arr.length === COLUMNS.length) setWidths(arr);
+        if (Array.isArray(arr) && arr.length === COLUMNS.length) setFracs(arr);
       }
     } catch {
       /* abaikan */
@@ -131,11 +147,11 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(widths));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(fracs));
     } catch {
       /* abaikan */
     }
-  }, [widths]);
+  }, [fracs]);
 
   useEffect(() => {
     const tickers = rows.map((r) => r.ticker).join(",");
@@ -208,27 +224,43 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const sorted = [...filtered].sort((a, b) => {
     const av = sortVal(a, sort.key);
     const bv = sortVal(b, sort.key);
-    const c = typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
+    const c =
+      typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
     return sort.dir === "asc" ? c : -c;
   });
 
+  // reset pagination saat filter berubah
+  useEffect(() => {
+    setVisible(PAGE);
+  }, [q, sektors, onlyDormant]);
+
+  const shown = sorted.slice(0, visible);
+
   function toggleSort(key?: SortKey) {
     if (!key) return;
-    setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: defaultDir(key) }));
+    setSort((s) =>
+      s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: defaultDir(key) },
+    );
   }
 
-  // resize kolom (drag handle di tepi kanan header)
+  // resize kolom: ambil/lepas lebar dari kolom tetangga → total tetap mengisi penuh
   function onResizeDown(e: React.MouseEvent, idx: number) {
     e.preventDefault();
     e.stopPropagation();
+    const tableW = tableRef.current?.clientWidth ?? 1000;
     const startX = e.clientX;
-    const startW = widths[idx];
+    const a = fracs[idx];
+    const b = fracs[idx + 1];
+    const minA = COLUMNS[idx].min / tableW;
+    const minB = COLUMNS[idx + 1].min / tableW;
     const move = (ev: MouseEvent) => {
-      const delta = ev.clientX - startX;
-      setWidths((w) => {
-        const next = [...w];
-        next[idx] = Math.max(COLUMNS[idx].min, startW + delta);
-        return next;
+      let d = (ev.clientX - startX) / tableW;
+      d = Math.max(-(a - minA), Math.min(d, b - minB));
+      setFracs((f) => {
+        const n = [...f];
+        n[idx] = a + d;
+        n[idx + 1] = b - d;
+        return n;
       });
     };
     const up = () => {
@@ -241,12 +273,11 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     document.body.style.userSelect = "none";
   }
 
-  const totalWidth = widths.reduce((a, b) => a + b, 0);
   const yieldClass = (y: number) => (y >= 6 ? "text-emerald-600 dark:text-emerald-400" : "text-fg");
 
   const statusNote =
     priceState === "loading"
-      ? "memuat harga terkini…"
+      ? "memuat harga…"
       : priceState === "ok"
         ? `Yield = berjalan (harga terkini${
             updatedTs
@@ -307,7 +338,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
         return <span className="text-muted">{formatTanggalSingkat(r.lastExDate)}</span>;
       case "pred":
         return r.dormant ? (
-          <span className="text-xs text-rose-600 dark:text-rose-400">tak ada pola, potensi rapel</span>
+          <span className="text-xs text-rose-600 dark:text-rose-400">tak ada pola</span>
         ) : (
           <span className="text-fg">{predLabel(r.nextPredDate, r.nextPredLabel)}</span>
         );
@@ -321,7 +352,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
       {/* kontrol — menempel di bawah header saat di-scroll */}
       <div className="sticky top-12 z-10 -mx-4 border-b border-line/60 bg-bg/85 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-bg/65">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <div className="relative w-full sm:w-52">
+          <div className="relative w-full sm:w-60">
             <Search
               size={15}
               className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
@@ -333,41 +364,40 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
               className="w-full rounded-lg border border-line bg-surface py-1.5 pl-8 pr-3 text-sm text-fg placeholder:text-faint"
             />
           </div>
-          <div className="flex gap-2">
-            <MultiSelect
-              options={sectors}
-              selected={sektors}
-              onChange={setSektors}
-              allLabel="Semua sektor"
-              className="min-w-0 flex-1 sm:w-48 sm:flex-none"
+          <MultiSelect
+            options={sectors}
+            selected={sektors}
+            onChange={setSektors}
+            allLabel="Semua sektor"
+            className="w-full sm:w-48"
+          />
+          {/* urut: hanya di mobile (desktop pakai klik header) */}
+          <div className="relative w-full sm:hidden">
+            <ArrowUpDown
+              size={15}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
             />
-            <div className="relative min-w-0 flex-1 sm:w-48 sm:flex-none">
-              <ArrowUpDown
-                size={15}
-                className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
-              />
-              <select
-                value={`${sort.key}:${sort.dir}`}
-                onChange={(e) => {
-                  const [key, dir] = e.target.value.split(":") as [SortKey, Dir];
-                  setSort({ key, dir });
-                }}
-                className="w-full appearance-none rounded-lg border border-line bg-surface py-1.5 pl-8 pr-8 text-sm text-fg"
-              >
-                {SORT_PRESETS.map((p) => (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
-                  </option>
-                ))}
-                {!SORT_PRESETS.some((p) => p.value === `${sort.key}:${sort.dir}`) && (
-                  <option value={`${sort.key}:${sort.dir}`}>Urutan kolom</option>
-                )}
-              </select>
-              <ChevronDown
-                size={15}
-                className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
-              />
-            </div>
+            <select
+              value={`${sort.key}:${sort.dir}`}
+              onChange={(e) => {
+                const [key, dir] = e.target.value.split(":") as [SortKey, Dir];
+                setSort({ key, dir });
+              }}
+              className="w-full appearance-none rounded-lg border border-line bg-surface py-1.5 pl-8 pr-8 text-sm text-fg"
+            >
+              {SORT_PRESETS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+              {!SORT_PRESETS.some((p) => p.value === `${sort.key}:${sort.dir}`) && (
+                <option value={`${sort.key}:${sort.dir}`}>Urutan kolom</option>
+              )}
+            </select>
+            <ChevronDown
+              size={15}
+              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
+            />
           </div>
           <label className="flex items-center gap-1.5 text-sm text-muted">
             <input
@@ -376,25 +406,18 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
               onChange={(e) => setOnlyDormant(e.target.checked)}
               className="accent-brand"
             />
-            Hanya dorman / rapel
+            Hanya dorman
           </label>
+          <span className="inline-flex items-center gap-1.5 text-xs text-faint sm:ml-auto">
+            {priceState === "loading" && (
+              <span className="h-2 w-2 animate-pulse rounded-full bg-brand/60" aria-hidden="true" />
+            )}
+            {priceState === "ok" && (
+              <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
+            )}
+            {statusNote}
+          </span>
         </div>
-      </div>
-
-      {/* toolbar: jumlah hasil + status harga (peletakan dirapikan) */}
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs text-faint">
-        <span>
-          Menampilkan <strong className="text-muted">{sorted.length}</strong> emiten
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          {priceState === "loading" && (
-            <span className="h-2 w-2 animate-pulse rounded-full bg-brand/60" aria-hidden="true" />
-          )}
-          {priceState === "ok" && (
-            <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
-          )}
-          {statusNote}
-        </span>
       </div>
 
       {sorted.length === 0 ? (
@@ -403,16 +426,20 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
         </div>
       ) : (
         <>
-          {/* data-grid — layar ≥ sm */}
-          <div className="hidden overflow-x-auto rounded-xl border border-line bg-surface shadow-card sm:block">
-            <table className="text-sm" style={{ width: totalWidth, tableLayout: "fixed" }}>
+          {/* data-grid — layar ≥ sm, mengisi penuh lebar */}
+          <div className="hidden overflow-hidden rounded-xl border border-line bg-surface shadow-card sm:block">
+            <table
+              ref={tableRef}
+              className="text-sm"
+              style={{ width: "100%", tableLayout: "fixed" }}
+            >
               <colgroup>
-                {widths.map((w, i) => (
-                  <col key={i} style={{ width: w }} />
+                {fracs.map((f, i) => (
+                  <col key={i} style={{ width: `${(f * 100).toFixed(3)}%` }} />
                 ))}
               </colgroup>
               <thead>
-                <tr className="border-b border-line bg-surface-2 text-left text-muted">
+                <tr className="border-b border-line bg-brand/5 text-left text-muted">
                   {COLUMNS.map((col, idx) => {
                     const active = sort.key === col.sortKey;
                     return (
@@ -431,14 +458,16 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
                             <button
                               type="button"
                               onClick={() => toggleSort(col.sortKey)}
-                              className="inline-flex items-center gap-1 truncate transition hover:text-fg"
+                              className={`inline-flex items-center gap-1 truncate transition hover:text-fg ${
+                                active ? "text-brand" : ""
+                              }`}
                             >
                               <span className="truncate">{col.label}</span>
                               {active ? (
                                 sort.dir === "asc" ? (
-                                  <ChevronUp size={13} className="shrink-0 text-brand" />
+                                  <ChevronUp size={13} className="shrink-0" />
                                 ) : (
-                                  <ChevronDown size={13} className="shrink-0 text-brand" />
+                                  <ChevronDown size={13} className="shrink-0" />
                                 )
                               ) : (
                                 <ChevronsUpDown size={13} className="shrink-0 text-faint/60" />
@@ -462,8 +491,11 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
                 </tr>
               </thead>
               <tbody>
-                {sorted.map((r) => (
-                  <tr key={r.ticker} className="group border-b border-line/70 last:border-0 hover:bg-surface-2">
+                {shown.map((r) => (
+                  <tr
+                    key={r.ticker}
+                    className="group border-b border-line/70 last:border-0 hover:bg-brand/5"
+                  >
                     {COLUMNS.map((col) => (
                       <td
                         key={col.id}
@@ -482,9 +514,26 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
 
           {/* kartu — layar < sm */}
           <div className="grid gap-2 sm:hidden">
-            {sorted.map((r) => (
+            {shown.map((r) => (
               <MobileCard key={r.ticker} r={r} yieldClass={yieldClass} />
             ))}
+          </div>
+
+          {/* pagination */}
+          <div className="flex flex-col items-center gap-2 pt-1 text-xs text-faint">
+            <span>
+              Menampilkan {shown.length} dari {sorted.length} emiten
+            </span>
+            {visible < sorted.length && (
+              <button
+                type="button"
+                onClick={() => setVisible((v) => v + PAGE)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-4 py-2 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-brand/5"
+              >
+                Tampilkan {Math.min(PAGE, sorted.length - visible)} lagi
+                <ChevronDown size={15} />
+              </button>
+            )}
           </div>
         </>
       )}

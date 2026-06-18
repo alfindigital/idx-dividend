@@ -40,14 +40,12 @@ function LogoMark() {
   return (
     <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <rect width="32" height="32" rx="8" fill="url(#lg)" />
-      <path
-        d="M8 20.5l4.5-4.5 3 3 5.5-6.5"
-        stroke="white"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="21" cy="12.5" r="2.1" fill="white" />
+      <g fill="white">
+        <rect x="7" y="16" width="3.6" height="8.5" rx="1.4" />
+        <rect x="13.8" y="12" width="3.6" height="12.5" rx="1.4" />
+        <rect x="20.6" y="8" width="3.6" height="16.5" rx="1.4" />
+      </g>
+      <circle cx="22.4" cy="6" r="2.1" fill="#fde68a" />
       <defs>
         <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
           <stop stopColor="#4f46e5" />
@@ -64,7 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <header className="sticky top-0 z-20 border-b border-line bg-bg/70 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5">
+          <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-2.5">
             <Link href="/" className="flex items-center gap-2">
               <LogoMark />
               <span className="font-display text-lg font-bold tracking-tight text-fg">
@@ -77,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </header>
-        <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
+        <main className="mx-auto max-w-[1600px] px-4 py-6">{children}</main>
         <SiteFooter />
         <BottomNav />
       </body>

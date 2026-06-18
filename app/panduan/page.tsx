@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import DashboardGuide from "@/components/DashboardGuide";
-import Disclaimer from "@/components/Disclaimer";
-import { Card } from "@/components/ui/Card";
 import { ArrowLeft, AlertTriangle } from "@/components/ui/icons";
 
 export const metadata: Metadata = {
@@ -12,12 +10,9 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-5">
       <div>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
-        >
+        <Link href="/" className="inline-flex items-center gap-1 text-sm text-brand hover:underline">
           <ArrowLeft size={15} /> Kembali ke daftar
         </Link>
       </div>
@@ -31,34 +26,26 @@ export default function Page() {
           Lacak history &amp; jadwal dividen saham IDX
         </h1>
         <p className="max-w-2xl text-sm text-muted">
-          Riwayat ~5 tahun, skor konsistensi &amp; tren jumlah, yield berjalan dari harga terkini,
-          dan perkiraan kapan dividen berikutnya kemungkinan dibagikan. Di bawah ini cara membaca
-          datanya, istilah penting, sumber, dan disclaimer.
+          Riwayat ~5 tahun, skor konsistensi &amp; tren, yield berjalan dari harga terkini, dan
+          perkiraan jadwal dividen berikutnya.
         </p>
       </header>
 
       <DashboardGuide open />
 
-      <Disclaimer />
-
-      <Card className="p-4">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-fg">
-          <AlertTriangle size={16} className="text-amber-500" /> Disclaimer
-        </h2>
-        <div className="mt-2 space-y-2 text-sm text-muted">
+      {/* satu blok disclaimer yang di-highlight */}
+      <div className="flex gap-2.5 rounded-xl border border-amber-300/50 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200/90">
+        <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+        <div className="space-y-1">
+          <p className="font-semibold">Catatan &amp; disclaimer</p>
           <p>
-            Data dikumpulkan dari sumber publik (IDX/KSEI/IR perusahaan, media keuangan) dan dapat
-            mengandung kekeliruan. Selalu verifikasi ke sumber resmi sebelum mengambil keputusan.
-          </p>
-          <p>
-            Prediksi tanggal bersifat <strong className="text-fg">perkiraan</strong> berbasis pola
-            historis, bukan kepastian. Jumlah dividen tidak diprediksi.
-          </p>
-          <p>
-            Halaman ini <strong className="text-fg">bukan saran investasi</strong>.
+            Data dirangkum dari sumber publik (IDX, KSEI, IR perusahaan, media keuangan) dan bisa
+            keliru, jadi verifikasi ke sumber resmi sebelum mengambil keputusan. Prediksi tanggal
+            adalah perkiraan pola historis, bukan kepastian, dan jumlah dividen tidak diprediksi.{" "}
+            <strong>Bukan saran investasi.</strong>
           </p>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
