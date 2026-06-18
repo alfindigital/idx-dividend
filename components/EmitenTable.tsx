@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "./Badges";
+import InfoTip from "./ui/InfoTip";
 import { formatPersen, formatTanggalSingkat, formatRupiah, BULAN_ID_SINGKAT } from "@/lib/format";
 
 export interface DashboardRow {
@@ -175,7 +176,12 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
             />
             Hanya dorman / rapel
           </label>
-          <span className="text-xs text-faint sm:ml-auto">{statusNote}</span>
+          <span className="inline-flex items-center gap-1 text-xs text-faint sm:ml-auto">
+            {priceState === "loading" && (
+              <span className="h-2 w-2 animate-pulse rounded-full bg-brand/60" aria-hidden="true" />
+            )}
+            {statusNote}
+          </span>
         </div>
       </div>
 
@@ -192,12 +198,40 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
                 <tr className="text-left">
                   <th className="px-3 py-2 font-semibold">Emiten</th>
                   <th className="px-3 py-2 font-semibold">Sektor</th>
-                  <th className="px-3 py-2 text-right font-semibold">Yield</th>
+                  <th className="px-3 py-2 text-right font-semibold">
+                    <span className="inline-flex items-center justify-end gap-1">
+                      Yield
+                      <InfoTip label="Yield berjalan" align="right">
+                        Total dividen 12 bulan terakhir ÷ harga saham sekarang. Hijau = ≥ 6%.
+                      </InfoTip>
+                    </span>
+                  </th>
                   <th className="px-3 py-2 text-right font-semibold">Div. terakhir</th>
-                  <th className="px-3 py-2 font-semibold">Konsistensi</th>
-                  <th className="px-3 py-2 font-semibold">Tren jumlah</th>
+                  <th className="px-3 py-2 font-semibold">
+                    <span className="inline-flex items-center gap-1">
+                      Konsistensi
+                      <InfoTip label="Konsistensi waktu">
+                        Seberapa teratur emiten membagikan dividen pada periode yang mirip tiap tahun.
+                      </InfoTip>
+                    </span>
+                  </th>
+                  <th className="px-3 py-2 font-semibold">
+                    <span className="inline-flex items-center gap-1">
+                      Tren jumlah
+                      <InfoTip label="Tren jumlah">
+                        Arah besaran dividen per lembar dari tahun ke tahun: naik, stabil, atau turun.
+                      </InfoTip>
+                    </span>
+                  </th>
                   <th className="px-3 py-2 font-semibold">Ex terakhir</th>
-                  <th className="px-3 py-2 font-semibold">Perkiraan berikutnya</th>
+                  <th className="px-3 py-2 font-semibold">
+                    <span className="inline-flex items-center gap-1">
+                      Perkiraan berikutnya
+                      <InfoTip label="Perkiraan berikutnya">
+                        Tebakan bulan ex-date berikutnya berdasarkan pola historis — bukan kepastian.
+                      </InfoTip>
+                    </span>
+                  </th>
                 </tr>
               </thead>
               <tbody>

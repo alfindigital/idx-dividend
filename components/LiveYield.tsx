@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatPersen } from "@/lib/format";
+import { Skeleton } from "./ui/Skeleton";
 
 const REFRESH_MS = 15 * 60 * 1000; // refetch harga tiap 15 menit selama tab terbuka
 
@@ -59,19 +60,26 @@ export default function LiveYield({
     ? new Date(ts).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
     : null;
 
+  const loadingNoData = state === "loading" && shown == null;
+
   return (
     <div>
-      <span
-        className={
-          running != null && running >= 6
-            ? "tabular text-emerald-600 dark:text-emerald-400"
-            : "tabular"
-        }
-      >
-        {shown != null ? formatPersen(shown) : "—"}
-      </span>
+      {loadingNoData ? (
+        <Skeleton className="h-5 w-16 align-middle" />
+      ) : (
+        <span
+          className={
+            running != null && running >= 6
+              ? "tabular text-emerald-600 dark:text-emerald-400"
+              : "tabular"
+          }
+        >
+          {shown != null ? formatPersen(shown) : "—"}
+        </span>
+      )}
       <div className="text-[10px] font-normal text-faint">
-        {state === "loading" && "memuat harga…"}
+        {loadingNoData && <Skeleton className="mt-1 h-2 w-24" />}
+        {state === "loading" && shown != null && "memuat harga…"}
         {running != null && `harga terkini Rp ${price?.toLocaleString("id-ID")}${jam ? " · " + jam : ""}`}
         {running == null && state === "ok" && ttm <= 0 && "tak ada dividen 12 bln terakhir — yield tercatat"}
         {running == null && state === "fail" &&

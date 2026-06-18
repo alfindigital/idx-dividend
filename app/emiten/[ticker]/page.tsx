@@ -16,6 +16,7 @@ import DividendTimeline from "@/components/DividendTimeline";
 import LiveYield from "@/components/LiveYield";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
 import { Card, CardLabel } from "@/components/ui/Card";
+import InfoTip from "@/components/ui/InfoTip";
 import { gcalUrl } from "@/lib/ics";
 import { BULAN_ID, labelTipe, formatRupiah, formatTanggal } from "@/lib/format";
 
@@ -26,10 +27,25 @@ export function generateStaticParams() {
   return allTickers().map((ticker) => ({ ticker }));
 }
 
-function StatCard({ label, children }: { label: string; children: React.ReactNode }) {
+function StatCard({
+  label,
+  tip,
+  children,
+}: {
+  label: string;
+  tip?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <Card className="p-3">
-      <CardLabel>{label}</CardLabel>
+      <div className="flex items-center gap-1">
+        <CardLabel>{label}</CardLabel>
+        {tip && (
+          <InfoTip label={label} align="left">
+            {tip}
+          </InfoTip>
+        )}
+      </div>
       <div className="mt-1 text-sm font-semibold text-fg">{children}</div>
     </Card>
   );
@@ -103,16 +119,30 @@ export default function Page({ params }: { params: { ticker: string } }) {
 
       {/* ringkasan */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard label="Yield berjalan (TTM)">
+        <StatCard
+          label="Yield berjalan (TTM)"
+          tip="Total dividen 12 bulan terakhir (TTM) dibagi harga saham sekarang, dalam persen. Makin tinggi makin besar imbal hasil dividen — tapi cek juga keberlanjutannya."
+        >
           <LiveYield ticker={emiten.ticker} ttm={ttm} fallbackYield={lastYield} />
         </StatCard>
-        <StatCard label="Konsistensi waktu">
+        <StatCard
+          label="Konsistensi waktu"
+          tip="Seberapa teratur emiten membagikan dividen pada periode yang mirip tiap tahun."
+        >
           <ConsistencyBadge value={timing} />
         </StatCard>
-        <StatCard label="Tren jumlah">
+        <StatCard
+          label="Tren jumlah"
+          tip="Arah besaran dividen per lembar dari tahun ke tahun: naik, stabil, atau turun."
+        >
           <TrendBadge value={trend} />
         </StatCard>
-        <StatCard label="Tahun membagikan (data)">{yp} tahun</StatCard>
+        <StatCard
+          label="Tahun membagikan (data)"
+          tip="Berapa tahun berbeda emiten ini tercatat membagikan dividen dalam data kami (±5 tahun terakhir)."
+        >
+          {yp} tahun
+        </StatCard>
       </section>
 
       {/* prediksi */}

@@ -1,5 +1,6 @@
 import EmitenTable, { DashboardRow } from "@/components/EmitenTable";
 import Disclaimer from "@/components/Disclaimer";
+import DashboardGuide from "@/components/DashboardGuide";
 import { emitenList, getDividends } from "@/lib/data";
 import {
   latestAnnual,
@@ -60,6 +61,8 @@ export default function Page() {
       </section>
 
       <Disclaimer />
+
+      <DashboardGuide />
 
       <EmitenTable rows={rows} />
     </div>
