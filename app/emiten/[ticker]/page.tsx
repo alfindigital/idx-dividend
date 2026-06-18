@@ -11,9 +11,10 @@ import {
   ttmDividend,
   eventDate,
 } from "@/lib/derive";
-import DividendChart from "@/components/DividendChart";
+import ChartSwitcher from "@/components/ChartSwitcher";
 import DividendTimeline from "@/components/DividendTimeline";
 import LiveYield from "@/components/LiveYield";
+import WatchlistButton from "@/components/WatchlistButton";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
 import { Card, CardLabel } from "@/components/ui/Card";
 import {
@@ -56,6 +57,15 @@ export default function Page({ params }: { params: { ticker: string } }) {
   const lastYield = sorted.find((d) => d.yield_pct != null)?.yield_pct ?? null;
   const ttm = ttmDividend(divs);
 
+  // seri yield historis (per tahun) untuk grafik DY
+  const yieldByYear = new Map<number, number>();
+  for (const d of divs) {
+    if (d.yield_pct != null) yieldByYear.set(d.tahun, (yieldByYear.get(d.tahun) ?? 0) + d.yield_pct);
+  }
+  const yieldSeries = Array.from(yieldByYear.entries())
+    .map(([tahun, y]) => ({ tahun, yield: Math.round(y * 100) / 100 }))
+    .sort((a, b) => a.tahun - b.tahun);
+
   // Event terdekat untuk tombol "Tambah ke Google Calendar":
   // utamakan event terumumkan yang belum lewat, jika tak ada pakai perkiraan terdekat.
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -96,11 +106,14 @@ export default function Page({ params }: { params: { ticker: string } }) {
       </div>
 
       <header className="space-y-2">
-        <div className="flex flex-wrap items-baseline gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <h1 className="font-display text-3xl font-bold tracking-tight text-fg">
             {emiten.ticker}
           </h1>
           <span className="text-muted">{emiten.nama}</span>
+          <span className="ml-auto">
+            <WatchlistButton ticker={emiten.ticker} withLabel />
+          </span>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className="rounded bg-surface-2 px-2 py-0.5 text-muted">{emiten.sektor}</span>
@@ -195,10 +208,10 @@ export default function Page({ params }: { params: { ticker: string } }) {
       {/* grafik */}
       <section>
         <h2 className="mb-2 flex items-center gap-2 font-display text-lg font-semibold text-fg">
-          <BarChart3 size={18} className="text-brand" /> Dividen per lembar per tahun (Rp)
+          <BarChart3 size={18} className="text-brand" /> Grafik historis
         </h2>
         <Card className="p-4">
-          <DividendChart data={totals} />
+          <ChartSwitcher dps={totals} yieldData={yieldSeries} />
         </Card>
       </section>
 

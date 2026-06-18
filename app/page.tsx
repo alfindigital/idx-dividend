@@ -3,6 +3,7 @@ import StatsBar, { DashboardStats } from "@/components/StatsBar";
 import { emitenList, dividendList, getDividends } from "@/lib/data";
 import {
   latestAnnual,
+  annualTotals,
   ttmDividend,
   timingConsistency,
   amountTrend,
@@ -39,6 +40,7 @@ export default function Page() {
       lastExDate: lastEvent ? eventDate(lastEvent) : null,
       nextPredDate: nextPred?.perkiraan ?? null,
       nextPredLabel: nextPred?.bulanLabel ?? null,
+      dpsSeries: annualTotals(divs).map((a) => a.total),
     };
   });
 

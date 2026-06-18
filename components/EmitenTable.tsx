@@ -5,15 +5,19 @@ import Link from "next/link";
 import { ConsistencyBadge, TrendBadge, FlagIcons } from "./Badges";
 import InfoTip from "./ui/InfoTip";
 import MultiSelect from "./MultiSelect";
+import MobileFilterSheet from "./MobileFilterSheet";
+import { Sparkline } from "./ui/Sparkline";
+import { Skeleton } from "./ui/Skeleton";
 import {
   Search,
   ChevronDown,
   ChevronUp,
   ChevronsUpDown,
   ChevronRight,
-  ArrowUpDown,
   ArrowUpRight,
+  Star,
 } from "./ui/icons";
+import { useWatchlist } from "@/lib/useWatchlist";
 import { formatPersen, formatTanggalSingkat, formatRupiah, BULAN_ID_SINGKAT } from "@/lib/format";
 
 export interface DashboardRow {
@@ -32,6 +36,7 @@ export interface DashboardRow {
   lastExDate: string | null;
   nextPredDate: string | null;
   nextPredLabel: string | null;
+  dpsSeries: number[];
 }
 
 type SortKey = "ticker" | "sektor" | "yield" | "div" | "lastEx" | "next" | "yearsPaid";
@@ -48,7 +53,7 @@ interface Col {
 }
 
 const COLUMNS: Col[] = [
-  { id: "emiten", label: "Emiten", w: 210, min: 150, sortKey: "ticker" },
+  { id: "emiten", label: "Emiten", w: 220, min: 160, sortKey: "ticker" },
   { id: "sektor", label: "Sektor", w: 150, min: 110, sortKey: "sektor" },
   {
     id: "yield",
@@ -57,16 +62,16 @@ const COLUMNS: Col[] = [
     min: 80,
     align: "right",
     sortKey: "yield",
-    tip: "Dividen 12 bln terakhir dibagi harga sekarang. Hijau = ≥ 6%.",
+    tip: "Dividen 12 bln terakhir dibagi harga sekarang. Warna makin hijau = makin tinggi.",
   },
   {
     id: "div",
     label: "Div.",
-    w: 120,
-    min: 90,
+    w: 130,
+    min: 100,
     align: "right",
     sortKey: "div",
-    tip: "Total dividen per lembar tahun pembayaran terakhir.",
+    tip: "Total dividen per lembar tahun pembayaran terakhir + tren mini DPS.",
   },
   {
     id: "konsistensi",
@@ -75,7 +80,7 @@ const COLUMNS: Col[] = [
     min: 100,
     tip: "Keteraturan waktu pembagian dividen tiap tahun.",
   },
-  { id: "tren", label: "Tren", w: 120, min: 90, tip: "Arah besaran dividen per lembar antar tahun." },
+  { id: "tren", label: "Tren", w: 110, min: 90, tip: "Arah besaran dividen per lembar antar tahun." },
   {
     id: "ex",
     label: "Ex",
@@ -115,6 +120,22 @@ function defaultDir(key: SortKey): Dir {
   return key === "ticker" || key === "sektor" || key === "next" ? "asc" : "desc";
 }
 
+function yieldColor(y: number): string {
+  if (y >= 10) return "text-emerald-500 dark:text-emerald-300";
+  if (y >= 7) return "text-emerald-600 dark:text-emerald-400";
+  if (y >= 5) return "text-lime-600 dark:text-lime-400";
+  if (y >= 3) return "text-sky-600 dark:text-sky-400";
+  return "text-muted";
+}
+
+function sparkColor(s: number[]): string {
+  if (s.length < 2) return "text-faint";
+  const d = s[s.length - 1] - s[0];
+  if (d > 0) return "text-emerald-500/60 group-hover:text-emerald-500";
+  if (d < 0) return "text-rose-500/60 group-hover:text-rose-500";
+  return "text-faint group-hover:text-muted";
+}
+
 const DEFAULT_FRACS = (() => {
   const t = COLUMNS.reduce((a, c) => a + c.w, 0);
   return COLUMNS.map((c) => c.w / t);
@@ -129,9 +150,11 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [minYield, setMinYield] = useState("");
   const [minDiv, setMinDiv] = useState("");
   const [trend, setTrend] = useState("");
+  const [onlyWatchlist, setOnlyWatchlist] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "yield", dir: "desc" });
   const [fracs, setFracs] = useState<number[]>(DEFAULT_FRACS);
   const tableRef = useRef<HTMLTableElement>(null);
+  const watchlist = useWatchlist();
 
   useEffect(() => {
     try {
@@ -188,6 +211,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   }, [rows]);
 
   const sectors = useMemo(() => Array.from(new Set(rows.map((r) => r.sektor))).sort(), [rows]);
+  const loading = priceState === "loading";
 
   const enriched = rows.map((r) => {
     const price = prices[r.ticker] ?? null;
@@ -204,7 +228,8 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     .filter((r) => (sektors.length ? sektors.includes(r.sektor) : true))
     .filter((r) => (!Number.isNaN(minY) ? (r.displayYield ?? -Infinity) >= minY : true))
     .filter((r) => (!Number.isNaN(minD) ? (r.lastAnnualTotal ?? -Infinity) >= minD : true))
-    .filter((r) => (trend ? r.trend === trend : true));
+    .filter((r) => (trend ? r.trend === trend : true))
+    .filter((r) => (onlyWatchlist ? watchlist.has(r.ticker) : true));
 
   function sortVal(r: Row, key: SortKey): string | number {
     switch (key) {
@@ -240,7 +265,6 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     );
   }
 
-  // resize kolom: ambil/lepas lebar dari kolom tetangga → total tetap mengisi penuh
   function onResizeDown(e: React.MouseEvent, idx: number) {
     e.preventDefault();
     e.stopPropagation();
@@ -270,28 +294,64 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     document.body.style.userSelect = "none";
   }
 
-  const yieldClass = (y: number) => (y >= 6 ? "text-emerald-600 dark:text-emerald-400" : "text-fg");
+  const statusNote = loading
+    ? "mengambil harga…"
+    : priceState === "ok"
+      ? `yield = dividen 12bln ÷ harga terkini${
+          updatedTs
+            ? ` · ${new Date(updatedTs).toLocaleTimeString("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}`
+            : ""
+        }`
+      : "harga live tak tersedia · yield = data terakhir";
 
-  const statusNote =
-    priceState === "loading"
-      ? "mengambil harga…"
-      : priceState === "ok"
-        ? `yield = dividen 12bln ÷ harga terkini${
-            updatedTs
-              ? ` · ${new Date(updatedTs).toLocaleTimeString("id-ID", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}`
-              : ""
-          }`
-        : "harga live tak tersedia · yield = data terakhir";
+  // chip filter aktif
+  const activeFilters: { key: string; label: string; clear: () => void }[] = [];
+  if (q) activeFilters.push({ key: "q", label: `Cari: "${q}"`, clear: () => setQ("") });
+  for (const s of sektors)
+    activeFilters.push({ key: `sek-${s}`, label: s, clear: () => setSektors(sektors.filter((x) => x !== s)) });
+  if (minYield && !Number.isNaN(minY))
+    activeFilters.push({ key: "my", label: `Yield ≥ ${minYield}%`, clear: () => setMinYield("") });
+  if (minDiv && !Number.isNaN(minD))
+    activeFilters.push({ key: "md", label: `Div ≥ Rp${minDiv}`, clear: () => setMinDiv("") });
+  if (trend) activeFilters.push({ key: "tr", label: `Tren ${trend.toLowerCase()}`, clear: () => setTrend("") });
+  if (onlyWatchlist)
+    activeFilters.push({ key: "wl", label: "★ Watchlist", clear: () => setOnlyWatchlist(false) });
+
+  function resetAll() {
+    setQ("");
+    setSektors([]);
+    setMinYield("");
+    setMinDiv("");
+    setTrend("");
+    setOnlyWatchlist(false);
+  }
 
   function renderCell(col: Col, r: Row) {
+    const fav = watchlist.has(r.ticker);
     switch (col.id) {
       case "emiten":
         return (
           <>
             <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                aria-label={fav ? "Hapus dari watchlist" : "Tambah ke watchlist"}
+                aria-pressed={fav}
+                title={fav ? "Hapus dari watchlist" : "Tambah ke watchlist"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  watchlist.toggle(r.ticker);
+                }}
+                className={`inline-flex shrink-0 items-center justify-center transition ${
+                  fav ? "text-amber-400" : "text-faint hover:text-amber-400"
+                }`}
+              >
+                <Star size={14} filled={fav} />
+              </button>
               <Link
                 href={`/emiten/${r.ticker}`}
                 className="group/tk inline-flex items-center gap-0.5 font-display font-semibold text-brand-strong hover:underline"
@@ -304,14 +364,15 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
               </Link>
               <FlagIcons dormant={r.dormant} special={r.special} />
             </div>
-            <div className="truncate text-xs text-muted">{r.nama}</div>
+            <div className="truncate pl-[22px] text-xs text-muted">{r.nama}</div>
           </>
         );
       case "sektor":
         return <span className="truncate text-muted">{r.sektor}</span>;
       case "yield":
+        if (loading) return <Skeleton className="h-4 w-12" />;
         return r.displayYield != null ? (
-          <span className={`font-semibold tabular ${yieldClass(r.displayYield)}`}>
+          <span className={`font-semibold tabular ${yieldColor(r.displayYield)}`}>
             {formatPersen(r.displayYield)}
             {!r.yieldFromLive && (
               <span className="ml-1 align-middle text-[10px] font-normal text-faint">tct</span>
@@ -322,10 +383,15 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
         );
       case "div":
         return (
-          <span className="tabular text-fg">
-            {formatRupiah(r.lastAnnualTotal)}
-            {r.lastYear ? <span className="ml-1 text-[10px] text-faint">{r.lastYear}</span> : null}
-          </span>
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="tabular text-fg">
+              {formatRupiah(r.lastAnnualTotal)}
+              {r.lastYear ? <span className="ml-1 text-[10px] text-faint">{r.lastYear}</span> : null}
+            </span>
+            {r.dpsSeries.length >= 2 && (
+              <Sparkline data={r.dpsSeries} className={`${sparkColor(r.dpsSeries)} transition`} />
+            )}
+          </div>
         );
       case "konsistensi":
         return <ConsistencyBadge value={r.timing} />;
@@ -344,6 +410,9 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     }
   }
 
+  const inputBar =
+    "w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint";
+
   return (
     <div className="space-y-3">
       {/* kontrol — menempel di bawah header saat di-scroll */}
@@ -358,82 +427,91 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Cari kode / nama…"
-              className="w-full rounded-lg border border-line bg-surface py-1.5 pl-8 pr-3 text-sm text-fg placeholder:text-faint"
+              className={`${inputBar} pl-8`}
             />
           </div>
-          <MultiSelect
-            options={sectors}
-            selected={sektors}
-            onChange={setSektors}
-            allLabel="Semua sektor"
-            className="w-full sm:w-44"
-          />
-          {/* ambang minimal yield & dividen */}
-          <div className="flex gap-2">
+
+          {/* kontrol desktop */}
+          <div className="hidden sm:contents">
+            <MultiSelect
+              options={sectors}
+              selected={sektors}
+              onChange={setSektors}
+              allLabel="Semua sektor"
+              className="w-44"
+            />
             <input
               value={minYield}
               onChange={(e) => setMinYield(e.target.value)}
               inputMode="decimal"
               placeholder="Yield ≥ %"
-              className="w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint sm:w-24"
+              className={`${inputBar} w-24`}
             />
             <input
               value={minDiv}
               onChange={(e) => setMinDiv(e.target.value)}
               inputMode="decimal"
               placeholder="Div ≥ Rp"
-              className="w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint sm:w-24"
+              className={`${inputBar} w-24`}
             />
-          </div>
-          {/* filter tren */}
-          <div className="relative w-full sm:w-36">
-            <select
-              value={trend}
-              onChange={(e) => setTrend(e.target.value)}
-              className="w-full appearance-none rounded-lg border border-line bg-surface py-1.5 pl-3 pr-8 text-sm text-fg"
+            <div className="relative w-36">
+              <select
+                value={trend}
+                onChange={(e) => setTrend(e.target.value)}
+                className={`${inputBar} appearance-none pr-8`}
+              >
+                <option value="">Semua tren</option>
+                <option value="Naik">Tren naik</option>
+                <option value="Stabil">Tren stabil</option>
+                <option value="Turun">Tren turun</option>
+              </select>
+              <ChevronDown
+                size={15}
+                className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setOnlyWatchlist((v) => !v)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition ${
+                onlyWatchlist
+                  ? "border-amber-400/50 bg-amber-400/10 text-fg"
+                  : "border-line bg-surface text-muted hover:text-fg"
+              }`}
             >
-              <option value="">Semua tren</option>
-              <option value="Naik">Tren naik</option>
-              <option value="Stabil">Tren stabil</option>
-              <option value="Turun">Tren turun</option>
-            </select>
-            <ChevronDown
-              size={15}
-              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
-            />
+              <Star size={15} filled={onlyWatchlist} className={onlyWatchlist ? "text-amber-400" : ""} />
+              Watchlist
+            </button>
           </div>
-          {/* urut: hanya di mobile (desktop pakai klik header) */}
-          <div className="relative w-full sm:hidden">
-            <ArrowUpDown
-              size={15}
-              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
-            />
-            <select
-              value={`${sort.key}:${sort.dir}`}
-              onChange={(e) => {
-                const [key, dir] = e.target.value.split(":") as [SortKey, Dir];
-                setSort({ key, dir });
-              }}
-              className="w-full appearance-none rounded-lg border border-line bg-surface py-1.5 pl-8 pr-8 text-sm text-fg"
-            >
-              {SORT_PRESETS.map((p) => (
-                <option key={p.value} value={p.value}>
-                  {p.label}
-                </option>
-              ))}
-              {!SORT_PRESETS.some((p) => p.value === `${sort.key}:${sort.dir}`) && (
-                <option value={`${sort.key}:${sort.dir}`}>Urutan kolom</option>
-              )}
-            </select>
-            <ChevronDown
-              size={15}
-              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
-            />
-          </div>
+
+          {/* filter mobile (bottom-sheet) */}
+          <MobileFilterSheet
+            sectors={sectors}
+            sektors={sektors}
+            setSektors={setSektors}
+            minYield={minYield}
+            setMinYield={setMinYield}
+            minDiv={minDiv}
+            setMinDiv={setMinDiv}
+            trend={trend}
+            setTrend={setTrend}
+            sortValue={`${sort.key}:${sort.dir}`}
+            setSortValue={(v) => {
+              const [key, dir] = v.split(":") as [SortKey, Dir];
+              setSort({ key, dir });
+            }}
+            sortPresets={SORT_PRESETS}
+            onlyWatchlist={onlyWatchlist}
+            setOnlyWatchlist={setOnlyWatchlist}
+            watchlistCount={watchlist.list.length}
+            activeCount={activeFilters.length}
+            onReset={resetAll}
+          />
+
           <span className="inline-flex flex-wrap items-center gap-x-1.5 text-xs text-faint sm:ml-auto">
             <span className="font-medium text-muted">{sorted.length} emiten</span>
             <span aria-hidden="true">·</span>
-            {priceState === "loading" && (
+            {loading && (
               <span className="h-2 w-2 animate-pulse rounded-full bg-brand/60" aria-hidden="true" />
             )}
             {priceState === "ok" && (
@@ -442,20 +520,49 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
             {statusNote}
           </span>
         </div>
+
+        {/* chip filter aktif */}
+        {activeFilters.length > 0 && (
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {activeFilters.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                onClick={f.clear}
+                className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2 py-0.5 text-xs text-muted transition hover:border-brand/40 hover:text-fg"
+              >
+                {f.label}
+                <span className="text-faint">×</span>
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={resetAll}
+              className="rounded-full px-2 py-0.5 text-xs font-medium text-brand hover:underline"
+            >
+              Reset semua
+            </button>
+          </div>
+        )}
       </div>
 
       {sorted.length === 0 ? (
         <div className="rounded-xl border border-line bg-surface p-6 text-center text-sm text-faint shadow-card">
           Tidak ada emiten yang cocok dengan filter.
+          {activeFilters.length > 0 && (
+            <button onClick={resetAll} className="ml-1 font-medium text-brand hover:underline">
+              Reset filter
+            </button>
+          )}
         </div>
       ) : (
         <>
-          {/* data-grid — layar ≥ sm, mengisi penuh lebar */}
-          <div className="hidden overflow-hidden rounded-xl border border-line bg-surface shadow-card sm:block">
+          {/* data-grid — layar ≥ sm, fill penuh + kolom Emiten ter-pin saat scroll */}
+          <div className="hidden overflow-x-auto rounded-xl border border-line bg-surface shadow-card sm:block">
             <table
               ref={tableRef}
               className="text-sm"
-              style={{ width: "100%", tableLayout: "fixed" }}
+              style={{ width: "100%", minWidth: 860, tableLayout: "fixed" }}
             >
               <colgroup>
                 {fracs.map((f, i) => (
@@ -463,15 +570,24 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
                 ))}
               </colgroup>
               <thead>
-                <tr className="border-b border-line bg-brand/5 text-left text-muted">
+                <tr className="border-b border-line bg-surface-2 text-left text-muted">
                   {COLUMNS.map((col, idx) => {
                     const active = sort.key === col.sortKey;
                     return (
                       <th
                         key={col.id}
+                        aria-sort={
+                          col.sortKey
+                            ? active
+                              ? sort.dir === "asc"
+                                ? "ascending"
+                                : "descending"
+                              : "none"
+                            : undefined
+                        }
                         className={`relative select-none px-3 py-2 font-semibold ${
                           col.align === "right" ? "text-right" : ""
-                        }`}
+                        } ${idx === 0 ? "sticky left-0 z-20 border-r border-line bg-surface-2" : ""}`}
                       >
                         <span
                           className={`inline-flex max-w-full items-center gap-1 ${
@@ -520,12 +636,12 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
                     key={r.ticker}
                     className="group border-b border-line/70 last:border-0 hover:bg-brand/5"
                   >
-                    {COLUMNS.map((col) => (
+                    {COLUMNS.map((col, idx) => (
                       <td
                         key={col.id}
                         className={`overflow-hidden px-3 py-2 align-middle ${
                           col.align === "right" ? "text-right" : ""
-                        }`}
+                        } ${idx === 0 ? "sticky left-0 z-10 border-r border-line bg-surface group-hover:bg-surface-2" : ""}`}
                       >
                         {renderCell(col, r)}
                       </td>
@@ -539,7 +655,13 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
           {/* kartu — layar < sm */}
           <div className="grid gap-2 sm:hidden">
             {sorted.map((r) => (
-              <MobileCard key={r.ticker} r={r} yieldClass={yieldClass} />
+              <MobileCard
+                key={r.ticker}
+                r={r}
+                loading={loading}
+                fav={watchlist.has(r.ticker)}
+                onToggleFav={() => watchlist.toggle(r.ticker)}
+              />
             ))}
           </div>
         </>
@@ -548,7 +670,17 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   );
 }
 
-function MobileCard({ r, yieldClass }: { r: any; yieldClass: (y: number) => string }) {
+function MobileCard({
+  r,
+  loading,
+  fav,
+  onToggleFav,
+}: {
+  r: any;
+  loading: boolean;
+  fav: boolean;
+  onToggleFav: () => void;
+}) {
   return (
     <Link
       href={`/emiten/${r.ticker}`}
@@ -557,18 +689,34 @@ function MobileCard({ r, yieldClass }: { r: any; yieldClass: (y: number) => stri
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              aria-label={fav ? "Hapus dari watchlist" : "Tambah ke watchlist"}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onToggleFav();
+              }}
+              className={`shrink-0 transition ${fav ? "text-amber-400" : "text-faint"}`}
+            >
+              <Star size={15} filled={fav} />
+            </button>
             <span className="font-display font-bold text-brand-strong">{r.ticker}</span>
             <FlagIcons dormant={r.dormant} special={r.special} />
           </div>
-          <div className="truncate text-xs text-muted">{r.nama}</div>
+          <div className="truncate pl-[21px] text-xs text-muted">{r.nama}</div>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
           <div className="text-right">
-            <div
-              className={`font-display text-lg font-bold tabular ${r.displayYield != null ? yieldClass(r.displayYield) : "text-fg"}`}
-            >
-              {r.displayYield != null ? formatPersen(r.displayYield) : "-"}
-            </div>
+            {loading ? (
+              <Skeleton className="h-5 w-14" />
+            ) : (
+              <div
+                className={`font-display text-lg font-bold tabular ${r.displayYield != null ? yieldColor(r.displayYield) : "text-fg"}`}
+              >
+                {r.displayYield != null ? formatPersen(r.displayYield) : "-"}
+              </div>
+            )}
             <div className="text-[10px] text-faint">
               {r.yieldFromLive ? "yield berjalan" : "yield terakhir"}
             </div>
@@ -585,9 +733,14 @@ function MobileCard({ r, yieldClass }: { r: any; yieldClass: (y: number) => stri
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
         <div>
           <div className="text-[11px] uppercase tracking-wide text-faint">Div. terakhir</div>
-          <div className="tabular text-fg">
-            {formatRupiah(r.lastAnnualTotal)}
-            {r.lastYear ? <span className="text-faint"> · {r.lastYear}</span> : ""}
+          <div className="flex items-center gap-2">
+            <span className="tabular text-fg">
+              {formatRupiah(r.lastAnnualTotal)}
+              {r.lastYear ? <span className="text-faint"> · {r.lastYear}</span> : ""}
+            </span>
+            {r.dpsSeries.length >= 2 && (
+              <Sparkline data={r.dpsSeries} className={sparkColor(r.dpsSeries)} />
+            )}
           </div>
         </div>
         <div>
