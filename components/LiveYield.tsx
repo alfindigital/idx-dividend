@@ -74,16 +74,16 @@ export default function LiveYield({
               : "tabular"
           }
         >
-          {shown != null ? formatPersen(shown) : "—"}
+          {shown != null ? formatPersen(shown) : "-"}
         </span>
       )}
       <div className="text-[10px] font-normal text-faint">
         {loadingNoData && <Skeleton className="mt-1 h-2 w-24" />}
         {state === "loading" && shown != null && "memuat harga…"}
         {running != null && `harga terkini Rp ${price?.toLocaleString("id-ID")}${jam ? " · " + jam : ""}`}
-        {running == null && state === "ok" && ttm <= 0 && "tak ada dividen 12 bln terakhir — yield tercatat"}
+        {running == null && state === "ok" && ttm <= 0 && "tak ada dividen 12 bln terakhir, yield tercatat"}
         {running == null && state === "fail" &&
-          (fallbackYield != null ? "harga live tak tersedia — yield tercatat" : "harga live tak tersedia")}
+          (fallbackYield != null ? "harga live tak tersedia, yield tercatat" : "harga live tak tersedia")}
       </div>
     </div>
   );

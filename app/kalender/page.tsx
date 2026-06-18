@@ -43,8 +43,8 @@ export default function Page() {
         <p className="max-w-3xl text-sm text-muted">
           Tanggal <strong>ex-dividend</strong> historis (warna solid) dan{" "}
           <strong>perkiraan</strong> tanggal berikutnya berbasis pola musiman (garis putus,
-          bertanda <code>?</code>). Bulan ramai dividen biasanya Maret–Juli (final) dan
-          Oktober–Desember (interim). Klik kode untuk detail. Jumlah dividen tidak diprediksi.
+          bertanda <code>?</code>). Bulan ramai dividen biasanya Maret-Juli (final) dan
+          Oktober-Desember (interim). Klik kode untuk detail. Jumlah dividen tidak diprediksi.
         </p>
         <a
           href="/api/ics"

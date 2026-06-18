@@ -1,5 +1,6 @@
 import EmitenTable, { DashboardRow } from "@/components/EmitenTable";
-import { emitenList, getDividends } from "@/lib/data";
+import StatsBar, { DashboardStats } from "@/components/StatsBar";
+import { emitenList, dividendList, getDividends } from "@/lib/data";
 import {
   latestAnnual,
   ttmDividend,
@@ -41,22 +42,41 @@ export default function Page() {
     };
   });
 
-  return (
-    <div className="space-y-5">
-      <section className="hero-glow pt-2">
-        <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
-          <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
-          Data Dividen IDX
-        </span>
-        <h1 className="mt-3 font-display text-3xl font-bold leading-[1.1] tracking-tight text-fg sm:text-[2.6rem]">
-          Lacak history &amp; jadwal dividen saham IDX
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
-          Riwayat ~5 tahun, skor konsistensi &amp; tren jumlah, yield berjalan dari harga terkini,
-          dan perkiraan kapan dividen berikutnya kemungkinan dibagikan.
-        </p>
-      </section>
+  // statistik ringkas untuk baris di atas tabel
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const cap = new Date();
+  cap.setDate(cap.getDate() + 60);
+  const capIso = cap.toISOString().slice(0, 10);
 
+  let topYield: { ticker: string; pct: number } | null = null;
+  for (const r of rows) {
+    if (r.lastYieldPct != null && (!topYield || r.lastYieldPct > topYield.pct)) {
+      topYield = { ticker: r.ticker, pct: r.lastYieldPct };
+    }
+  }
+
+  let nextEx: { ticker: string; date: string } | null = null;
+  for (const d of dividendList) {
+    const iso = eventDate(d);
+    if (iso && iso >= todayIso && (!nextEx || iso < nextEx.date)) {
+      nextEx = { ticker: d.ticker, date: iso };
+    }
+  }
+
+  const stats: DashboardStats = {
+    emiten: rows.length,
+    events: dividendList.length,
+    teratur: rows.filter((r) => r.timing === "Sangat teratur" || r.timing === "Cukup teratur").length,
+    topYield,
+    nextEx,
+    pred60: rows.filter((r) => r.nextPredDate && r.nextPredDate >= todayIso && r.nextPredDate <= capIso)
+      .length,
+  };
+
+  return (
+    <div className="space-y-4">
+      <h1 className="sr-only">Data dividen saham IDX: history, yield, dan jadwal</h1>
+      <StatsBar stats={stats} />
       <EmitenTable rows={rows} />
     </div>
   );

@@ -93,6 +93,31 @@ export const ChevronDown = (p: IconProps) => (
   </Svg>
 );
 
+export const ChevronUp = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m18 15-6-6-6 6" />
+  </Svg>
+);
+
+export const ChevronsUpDown = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m7 15 5 5 5-5M7 9l5-5 5 5" />
+  </Svg>
+);
+
+export const ArrowUpDown = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m21 16-4 4-4-4M17 20V4M3 8l4-4 4 4M7 4v16" />
+  </Svg>
+);
+
+export const Sparkles = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 3l1.9 5.2 5.2 1.9-5.2 1.9L12 17l-1.9-5L5 10.1l5.1-1.9z" />
+    <path d="M19 14v4M21 16h-4" />
+  </Svg>
+);
+
 export const ChevronLeft = (p: IconProps) => (
   <Svg {...p}>
     <path d="m15 18-6-6 6-6" />

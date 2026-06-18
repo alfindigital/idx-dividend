@@ -124,7 +124,7 @@ export default function CalendarView({
                   <Link
                     key={j}
                     href={`/emiten/${e.ticker}`}
-                    title={`${e.ticker} — ${e.tipe} (${e.kind})`}
+                    title={`${e.ticker} · ${e.tipe} (${e.kind})`}
                     className={`block truncate rounded px-1 text-[10px] leading-tight ${
                       e.kind === "prediksi"
                         ? "border border-dashed border-amber-400 text-amber-700 dark:text-amber-300"

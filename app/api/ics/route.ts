@@ -31,12 +31,12 @@ function emitenIcsEvents(
     const t = labelTipe(d.tipe).toLowerCase();
     const dpsTxt = d.dps_idr != null ? ` ${formatRupiah(d.dps_idr)}/lembar` : "";
     const desc = [
-      `${em.nama} — dividen ${t} (tahun pembayaran ${d.tahun}).`,
+      `${em.nama} · dividen ${t} (tahun pembayaran ${d.tahun}).`,
       d.dps_idr != null
         ? `Jumlah: ${formatRupiah(d.dps_idr)}/lembar.`
         : `Jumlah: belum dipastikan.`,
       d.cum_date
-        ? `Cum-date: ${formatTanggal(d.cum_date)} — beli sebelum/pada tanggal ini agar dapat dividen.`
+        ? `Cum-date: ${formatTanggal(d.cum_date)}. Beli sebelum/pada tanggal ini agar dapat dividen.`
         : "",
       d.ex_date ? `Ex-date: ${formatTanggal(d.ex_date)}.` : "",
       d.payment_date ? `Pembayaran: ${formatTanggal(d.payment_date)}.` : "",
@@ -66,7 +66,7 @@ function emitenIcsEvents(
         summary: `${em.ticker} ex-dividen ${t} (perkiraan)`,
         description: [
           `Perkiraan ex-date ${t} ${em.nama} berbasis pola musiman (keyakinan ${p.confidence}).`,
-          `PERKIRAAN — bukan kepastian; jumlah dividen tidak diprediksi.`,
+          `PERKIRAAN, bukan kepastian; jumlah dividen tidak diprediksi.`,
           `Detail: ${url}`,
         ].join("\n"),
         url,
@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
   const todayIso = today.toISOString().slice(0, 10);
 
   let events: IcsEvent[] = [];
-  let calName = "Dividen IDX — jadwal mendatang";
+  let calName = "Dividen IDX · jadwal mendatang";
   let filename = "dividen-idx.ics";
 
   if (tickerParam) {
@@ -95,7 +95,7 @@ export async function GET(req: NextRequest) {
     }
     // Per-emiten: sertakan prediksi (user memilih emiten ini secara spesifik).
     events = emitenIcsEvents(em, origin, todayIso, today, true);
-    calName = `Dividen ${em.ticker} — ${em.nama}`;
+    calName = `Dividen ${em.ticker} · ${em.nama}`;
     filename = `dividen-${em.ticker}.ics`;
   } else {
     // Semua emiten: hanya event terumumkan (konkret), tanpa prediksi agar tidak ramai.

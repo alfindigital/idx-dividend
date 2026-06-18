@@ -21,7 +21,7 @@ const grotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Dividen IDX — History & Kalender",
+  title: "Dividen IDX · History & Kalender",
   description:
     "Riwayat dividen 5 tahun & perkiraan jadwal dividen berikutnya untuk emiten IDX berdividen besar.",
 };

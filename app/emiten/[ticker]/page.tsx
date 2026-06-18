@@ -134,7 +134,7 @@ export default function Page({ params }: { params: { ticker: string } }) {
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
           label="Yield berjalan (TTM)"
-          tip="Total dividen 12 bulan terakhir (TTM) dibagi harga saham sekarang, dalam persen. Makin tinggi makin besar imbal hasil dividen — tapi cek juga keberlanjutannya."
+          tip="Total dividen 12 bulan terakhir (TTM) dibagi harga saham sekarang, dalam persen. Makin tinggi makin besar imbal hasil dividen, tapi cek juga keberlanjutannya."
         >
           <LiveYield ticker={emiten.ticker} ttm={ttm} fallbackYield={lastYield} />
         </StatCard>
@@ -166,7 +166,7 @@ export default function Page({ params }: { params: { ticker: string } }) {
         {emiten.flags.dormant ? (
           <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/90">
             Emiten ini tidak membagikan dividen secara teratur belakangan ini (potensi rapel).
-            Tidak ada prediksi tanggal — pantau pengumuman resmi.
+            Tidak ada prediksi tanggal, pantau pengumuman resmi.
           </p>
         ) : preds.length === 0 ? (
           <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/90">

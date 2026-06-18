@@ -22,18 +22,18 @@ export function parseDate(iso: string | null | undefined): Date | null {
 
 export function formatTanggal(iso: string | null | undefined): string {
   const d = parseDate(iso);
-  if (!d) return "—";
+  if (!d) return "-";
   return `${d.getDate()} ${BULAN_ID[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export function formatTanggalSingkat(iso: string | null | undefined): string {
   const d = parseDate(iso);
-  if (!d) return "—";
+  if (!d) return "-";
   return `${d.getDate()} ${BULAN_ID_SINGKAT[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export function formatRupiah(n: number | null | undefined, maxDesimal = 2): string {
-  if (n == null) return "—";
+  if (n == null) return "-";
   return (
     "Rp " +
     n.toLocaleString("id-ID", {
@@ -44,7 +44,7 @@ export function formatRupiah(n: number | null | undefined, maxDesimal = 2): stri
 }
 
 export function formatAngka(n: number | null | undefined, maxDesimal = 2): string {
-  if (n == null) return "—";
+  if (n == null) return "-";
   return n.toLocaleString("id-ID", {
     minimumFractionDigits: 0,
     maximumFractionDigits: maxDesimal,
@@ -52,7 +52,7 @@ export function formatAngka(n: number | null | undefined, maxDesimal = 2): strin
 }
 
 export function formatPersen(n: number | null | undefined): string {
-  if (n == null) return "—";
+  if (n == null) return "-";
   return (
     n.toLocaleString("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 2 }) + "%"
   );

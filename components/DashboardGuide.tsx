@@ -25,7 +25,7 @@ export default function DashboardGuide({ open = false }: { open?: boolean }) {
         <Row title="Yield berjalan">
           Total dividen 12 bulan terakhir ÷ harga saham sekarang, dalam persen. Angka{" "}
           <span className="font-semibold text-emerald-600 dark:text-emerald-400">hijau</span> = ≥ 6%
-          (relatif tinggi). Yield tinggi belum tentu bagus — cek keberlanjutannya.
+          (relatif tinggi). Yield tinggi belum tentu bagus, cek keberlanjutannya.
         </Row>
         <Row title="Div. terakhir">
           Total dividen per lembar (Rp) pada tahun pembayaran terakhir yang tercatat.
@@ -63,7 +63,7 @@ export default function DashboardGuide({ open = false }: { open?: boolean }) {
           <strong>Pernah spesial</strong> = pernah ada dividen tidak rutin (bonus).
         </Row>
         <Row title="Perkiraan berikutnya">
-          Tebakan bulan ex-date berikutnya berdasarkan pola historis — <strong>bukan kepastian</strong>,
+          Tebakan bulan ex-date berikutnya berdasarkan pola historis, <strong>bukan kepastian</strong>,
           dan jumlahnya tidak diprediksi.
         </Row>
       </div>

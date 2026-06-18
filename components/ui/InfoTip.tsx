@@ -3,50 +3,62 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Info } from "./icons";
 
+const WIDTH = 240;
+
 /**
  * Tooltip penjelas istilah — ramah pemula & aksesibel.
- * - Desktop: muncul saat hover.
- * - Mobile: ketuk ikon "i" untuk buka/tutup (tap di luar / Esc menutup).
- * - Aman dipakai di dalam elemen yang bisa diklik (stopPropagation).
+ * Diposisikan `fixed` lalu di-clamp ke viewport agar tidak pernah keluar layar
+ * (anti-offside) dan tidak terpotong oleh kontainer yang overflow.
  */
 export default function InfoTip({
   label,
   children,
-  align = "center",
 }: {
   label?: string;
   children: ReactNode;
+  /** dipertahankan demi kompatibilitas pemanggil lama; tidak lagi dipakai */
   align?: "center" | "left" | "right";
 }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLSpanElement>(null);
+  const [pos, setPos] = useState<{ left: number; top: number }>({ left: -9999, top: -9999 });
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  function place() {
+    const el = btnRef.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const vw = window.innerWidth;
+    let left = r.left + r.width / 2 - WIDTH / 2;
+    left = Math.max(8, Math.min(left, vw - WIDTH - 8));
+    setPos({ left, top: r.bottom + 6 });
+  }
 
   useEffect(() => {
     if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
+    place();
+    const close = () => setOpen(false);
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener("mousedown", onDoc);
+    const onDoc = (e: MouseEvent) => {
+      if (btnRef.current && !btnRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener("scroll", close, true);
+    window.addEventListener("resize", close);
     document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDoc);
     return () => {
-      document.removeEventListener("mousedown", onDoc);
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
       document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDoc);
     };
   }, [open]);
 
-  const pos =
-    align === "left"
-      ? "left-0"
-      : align === "right"
-        ? "right-0"
-        : "left-1/2 -translate-x-1/2";
-
   return (
-    <span ref={ref} className="relative inline-flex align-middle">
+    <span className="inline-flex align-middle">
       <button
+        ref={btnRef}
         type="button"
         aria-label={label ? `Penjelasan: ${label}` : "Penjelasan"}
         aria-expanded={open}
@@ -64,7 +76,8 @@ export default function InfoTip({
       {open && (
         <span
           role="tooltip"
-          className={`absolute top-full z-40 mt-1 w-56 max-w-[75vw] rounded-lg border border-line bg-surface p-2 text-left text-xs font-normal normal-case leading-relaxed text-muted shadow-card ${pos}`}
+          style={{ position: "fixed", left: pos.left, top: pos.top, width: WIDTH }}
+          className="z-50 rounded-lg border border-line bg-surface p-2 text-left text-xs font-normal normal-case leading-relaxed text-muted shadow-card"
         >
           {children}
         </span>

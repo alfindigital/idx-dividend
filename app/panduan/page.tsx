@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { ArrowLeft, AlertTriangle } from "@/components/ui/icons";
 
 export const metadata: Metadata = {
-  title: "Panduan & Informasi — Dividen IDX",
+  title: "Panduan & Informasi · Dividen IDX",
   description: "Cara membaca data dividen, istilah penting, sumber, dan disclaimer.",
 };
 
@@ -22,12 +22,18 @@ export default function Page() {
         </Link>
       </div>
 
-      <header className="space-y-1">
+      <header className="space-y-2">
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
+          Data Dividen IDX
+        </span>
         <h1 className="font-display text-2xl font-bold tracking-tight text-fg">
-          Panduan &amp; Informasi
+          Lacak history &amp; jadwal dividen saham IDX
         </h1>
-        <p className="text-sm text-muted">
-          Cara membaca data, istilah penting, sumber, dan disclaimer.
+        <p className="max-w-2xl text-sm text-muted">
+          Riwayat ~5 tahun, skor konsistensi &amp; tren jumlah, yield berjalan dari harga terkini,
+          dan perkiraan kapan dividen berikutnya kemungkinan dibagikan. Di bawah ini cara membaca
+          datanya, istilah penting, sumber, dan disclaimer.
         </p>
       </header>
 
