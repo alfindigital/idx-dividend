@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "./Badges";
 import InfoTip from "./ui/InfoTip";
+import { Search, ChevronDown, ChevronRight } from "./ui/icons";
 import { formatPersen, formatTanggalSingkat, formatRupiah, BULAN_ID_SINGKAT } from "@/lib/format";
 
 export interface DashboardRow {
@@ -33,7 +34,7 @@ function predLabel(dateIso: string | null, bulanLabel: string | null): string {
 }
 
 const inputClass =
-  "rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-brand/40";
+  "rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint";
 
 export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [prices, setPrices] = useState<Record<string, number | null>>({});
@@ -134,38 +135,56 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   return (
     <div className="space-y-3">
       {/* kontrol — menempel di bawah header saat di-scroll */}
-      <div className="sticky top-14 z-10 -mx-4 border-b border-line/60 bg-bg/85 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-bg/65">
+      <div className="sticky top-12 z-10 -mx-4 border-b border-line/60 bg-bg/85 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-bg/65">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Cari kode / nama…"
-            className={`${inputClass} w-full sm:w-44`}
-          />
+          <div className="relative w-full sm:w-52">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
+            />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Cari kode / nama…"
+              className={`${inputClass} w-full pl-8`}
+            />
+          </div>
           <div className="flex gap-2">
-            <select
-              value={sektor}
-              onChange={(e) => setSektor(e.target.value)}
-              className={`${inputClass} min-w-0 flex-1 sm:flex-none`}
-            >
-              <option value="">Semua sektor</option>
-              {sectors.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-            <select
-              value={sortKey}
-              onChange={(e) => setSortKey(e.target.value as SortKey)}
-              className={`${inputClass} min-w-0 flex-1 sm:flex-none`}
-            >
-              <option value="yield">Urut: Yield tertinggi</option>
-              <option value="next">Urut: Dividen terdekat</option>
-              <option value="lastEx">Urut: Pembagian terakhir</option>
-              <option value="yearsPaid">Urut: Paling konsisten</option>
-              <option value="ticker">Urut: Kode (A–Z)</option>
-            </select>
+            <div className="relative min-w-0 flex-1 sm:flex-none">
+              <select
+                value={sektor}
+                onChange={(e) => setSektor(e.target.value)}
+                className={`${inputClass} w-full appearance-none pr-8`}
+              >
+                <option value="">Semua sektor</option>
+                {sectors.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={15}
+                className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
+              />
+            </div>
+            <div className="relative min-w-0 flex-1 sm:flex-none">
+              <select
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value as SortKey)}
+                className={`${inputClass} w-full appearance-none pr-8`}
+              >
+                <option value="yield">Urut: Yield tertinggi</option>
+                <option value="next">Urut: Dividen terdekat</option>
+                <option value="lastEx">Urut: Pembagian terakhir</option>
+                <option value="yearsPaid">Urut: Paling konsisten</option>
+                <option value="ticker">Urut: Kode (A–Z)</option>
+              </select>
+              <ChevronDown
+                size={15}
+                className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
+              />
+            </div>
           </div>
           <label className="flex items-center gap-1 text-sm text-muted">
             <input
@@ -309,20 +328,25 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     return (
       <Link
         href={`/emiten/${r.ticker}`}
-        className="block rounded-2xl border border-line bg-surface p-3 shadow-card active:bg-surface-2"
+        className="block rounded-xl border border-line bg-surface p-3 shadow-card transition hover:border-brand/40 active:bg-surface-2"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="font-bold text-brand-strong">{r.ticker}</div>
+            <div className="font-display font-bold text-fg">{r.ticker}</div>
             <div className="truncate text-xs text-muted">{r.nama}</div>
           </div>
-          <div className="shrink-0 text-right">
-            <div className={`text-lg font-bold tabular ${r.displayYield != null ? yieldClass(r.displayYield) : "text-fg"}`}>
-              {r.displayYield != null ? formatPersen(r.displayYield) : "—"}
+          <div className="flex shrink-0 items-center gap-1.5">
+            <div className="text-right">
+              <div
+                className={`font-display text-lg font-bold tabular ${r.displayYield != null ? yieldClass(r.displayYield) : "text-fg"}`}
+              >
+                {r.displayYield != null ? formatPersen(r.displayYield) : "—"}
+              </div>
+              <div className="text-[10px] text-faint">
+                {r.yieldFromLive ? "yield berjalan" : "yield terakhir"}
+              </div>
             </div>
-            <div className="text-[10px] text-faint">
-              {r.yieldFromLive ? "yield berjalan" : "yield terakhir"}
-            </div>
+            <ChevronRight size={16} className="text-faint" />
           </div>
         </div>
 

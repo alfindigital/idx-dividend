@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Sun, Moon } from "./ui/icons";
 
 /**
  * Tombol ganti tema terang/gelap.
- * - Status awal dibaca dari class `.dark` di <html> (sudah diset oleh skrip
- *   anti-flash di layout sebelum React hydrate).
+ * - Status awal dibaca dari class `.dark` di <html> (diset skrip anti-flash).
  * - Pilihan disimpan ke localStorage agar persisten antar kunjungan.
  */
 export default function ThemeToggle() {
@@ -34,9 +34,11 @@ export default function ThemeToggle() {
       onClick={toggle}
       aria-label={dark ? "Ganti ke mode terang" : "Ganti ke mode gelap"}
       title={dark ? "Mode terang" : "Mode gelap"}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-base text-white/90 transition hover:bg-white/10"
+      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line bg-surface text-muted transition hover:border-brand/40 hover:text-fg"
     >
-      <span suppressHydrationWarning>{mounted ? (dark ? "☀️" : "🌙") : "🌙"}</span>
+      <span suppressHydrationWarning className="inline-flex">
+        {mounted && dark ? <Sun size={17} /> : <Moon size={17} />}
+      </span>
     </button>
   );
 }

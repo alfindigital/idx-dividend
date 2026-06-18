@@ -21,20 +21,22 @@ const config: Config = {
         brand: {
           DEFAULT: v("--brand"),
           strong: v("--brand-strong"),
-          // alias lama agar kelas lama (brand-dark / brand-light) tetap valid
           dark: v("--brand-strong"),
           light: v("--brand"),
         },
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "var(--font-sans)", "ui-sans-serif", "sans-serif"],
       },
       borderRadius: {
-        xl: "0.9rem",
-        "2xl": "1.25rem",
+        // skala lebih tajam ("tajam & rapat") — kartu jadi 12px, bukan 16px
+        xl: "0.625rem",
+        "2xl": "0.75rem",
       },
       boxShadow: {
-        card: "0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -16px rgb(15 23 42 / 0.18)",
+        card: "0 1px 2px rgb(8 8 13 / 0.04), 0 1px 3px rgb(8 8 13 / 0.05)",
+        glow: "0 8px 24px -10px rgb(79 70 229 / 0.6)",
       },
     },
   },

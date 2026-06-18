@@ -17,6 +17,14 @@ import LiveYield from "@/components/LiveYield";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
 import { Card, CardLabel } from "@/components/ui/Card";
 import InfoTip from "@/components/ui/InfoTip";
+import {
+  ArrowLeft,
+  Download,
+  CalendarPlus,
+  CalendarDays,
+  BarChart3,
+  ExternalLink,
+} from "@/components/ui/icons";
 import { gcalUrl } from "@/lib/ics";
 import { BULAN_ID, labelTipe, formatRupiah, formatTanggal } from "@/lib/format";
 
@@ -96,14 +104,19 @@ export default function Page({ params }: { params: { ticker: string } }) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/" className="text-sm text-brand hover:underline">
-          ← Kembali ke daftar
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
+        >
+          <ArrowLeft size={15} /> Kembali ke daftar
         </Link>
       </div>
 
       <header className="space-y-2">
         <div className="flex flex-wrap items-baseline gap-2">
-          <h1 className="text-2xl font-bold text-fg">{emiten.ticker}</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-fg">
+            {emiten.ticker}
+          </h1>
           <span className="text-muted">{emiten.nama}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -185,34 +198,38 @@ export default function Page({ params }: { params: { ticker: string } }) {
 
       {/* ekspor kalender */}
       <Card className="p-4">
-        <h2 className="text-sm font-semibold text-fg">📅 Ekspor ke kalender</h2>
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-fg">
+          <CalendarDays size={16} className="text-brand" /> Ekspor ke kalender
+        </h2>
         <p className="mt-1 text-xs text-muted">
           Tambahkan jadwal dividen {emiten.ticker} (yang sudah diumumkan + perkiraan) ke kalendermu,
           lengkap dengan pengingat 1 hari sebelum ex-date.
         </p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <a
-            href={`/api/ics?ticker=${emiten.ticker}`}
-            className="inline-flex items-center gap-1 rounded-lg border border-line bg-surface-2 px-3 py-1.5 text-sm font-medium text-fg transition hover:bg-line/40"
-          >
-            ⬇️ Unduh .ics (Apple / Outlook / Google)
-          </a>
+        <div className="mt-3 flex flex-wrap gap-2">
           {nextCal && (
             <a
               href={gcalUrl(nextCal)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded-lg border border-brand/30 bg-brand/10 px-3 py-1.5 text-sm font-medium text-brand-strong transition hover:bg-brand/20"
+              className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-glow transition hover:bg-indigo-500"
             >
-              📅 Tambah jadwal terdekat ke Google Calendar
+              <CalendarPlus size={15} /> Tambah ke Google Calendar
             </a>
           )}
+          <a
+            href={`/api/ics?ticker=${emiten.ticker}`}
+            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-surface-2"
+          >
+            <Download size={15} /> Unduh .ics (Apple / Outlook / Google)
+          </a>
         </div>
       </Card>
 
       {/* grafik */}
       <section>
-        <h2 className="mb-2 text-lg font-semibold text-fg">Dividen per lembar per tahun (Rp)</h2>
+        <h2 className="mb-2 flex items-center gap-2 font-display text-lg font-semibold text-fg">
+          <BarChart3 size={18} className="text-brand" /> Dividen per lembar per tahun (Rp)
+        </h2>
         <Card className="p-4">
           <DividendChart data={totals} />
         </Card>
@@ -220,7 +237,7 @@ export default function Page({ params }: { params: { ticker: string } }) {
 
       {/* timeline */}
       <section>
-        <h2 className="mb-2 text-lg font-semibold text-fg">Riwayat lengkap</h2>
+        <h2 className="mb-2 font-display text-lg font-semibold text-fg">Riwayat lengkap</h2>
         <DividendTimeline events={divs} />
       </section>
 
@@ -233,9 +250,9 @@ export default function Page({ params }: { params: { ticker: string } }) {
               href={u}
               target="_blank"
               rel="noopener noreferrer"
-              className="mr-2 text-brand hover:underline"
+              className="mr-2 inline-flex items-center gap-1 text-brand hover:underline"
             >
-              🔗 sumber {i + 1}
+              <ExternalLink size={13} /> sumber {i + 1}
             </a>
           ))}
         </section>

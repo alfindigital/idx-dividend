@@ -3,51 +3,51 @@
 @tailwind utilities;
 
 /* ============================================================
-   Design tokens — light (default) & dark (.dark on <html>).
-   Disimpan sebagai channel RGB ("15 118 110") agar utility
-   Tailwind tetap bisa memakai opacity, mis. bg-brand/10.
+   Design tokens — "Bold Modern Indigo".
+   Light (default) & dark (.dark pada <html>). Channel RGB agar
+   utility Tailwind tetap bisa pakai opacity (mis. bg-brand/10).
    ============================================================ */
 :root {
   color-scheme: light;
 
-  --bg: 247 249 251; /* latar halaman */
-  --surface: 255 255 255; /* kartu / panel */
-  --surface-2: 248 250 252; /* header tabel, input, chip */
-  --border: 226 232 240; /* garis tepi */
-  --fg: 15 23 42; /* teks utama */
-  --muted: 100 116 139; /* teks sekunder */
-  --faint: 148 163 184; /* teks tersier / caption */
+  --bg: 251 251 253;
+  --surface: 255 255 255;
+  --surface-2: 244 244 247;
+  --border: 231 231 238;
+  --fg: 11 11 20;
+  --muted: 92 92 110;
+  --faint: 156 156 173;
 
-  --brand: 13 148 136; /* teal-600 */
-  --brand-strong: 15 118 110; /* teal-700 */
-  --accent: 217 119 6; /* amber-600 — nuansa "emas dividen" */
+  --brand: 99 102 241; /* indigo-500 */
+  --brand-strong: 79 70 229; /* indigo-600 */
+  --accent: 124 58 237; /* violet-600 */
 
   /* warna penuh untuk chart (Recharts) */
-  --chart-bar: #0d9488;
-  --chart-bar-to: #2dd4bf;
-  --chart-grid: #e2e8f0;
-  --chart-axis: #94a3b8;
+  --chart-bar: #4f46e5;
+  --chart-bar-to: #a78bfa;
+  --chart-grid: #e7e7ee;
+  --chart-axis: #9c9cad;
 }
 
 .dark {
   color-scheme: dark;
 
-  --bg: 8 12 22;
-  --surface: 17 24 39;
-  --surface-2: 30 41 59;
-  --border: 39 51 71;
-  --fg: 226 232 240;
-  --muted: 148 163 184;
-  --faint: 100 116 139;
+  --bg: 8 8 13;
+  --surface: 18 18 25;
+  --surface-2: 28 28 40;
+  --border: 39 39 58;
+  --fg: 236 236 244;
+  --muted: 162 162 181;
+  --faint: 106 106 126;
 
-  --brand: 45 212 191; /* teal-400 — lebih terang agar kontras di gelap */
-  --brand-strong: 94 234 212; /* teal-300 */
-  --accent: 251 191 36; /* amber-400 */
+  --brand: 129 140 248; /* indigo-400 */
+  --brand-strong: 165 180 252; /* indigo-300 */
+  --accent: 167 139 250; /* violet-400 */
 
-  --chart-bar: #2dd4bf;
-  --chart-bar-to: #5eead4;
-  --chart-grid: #1f2a3a;
-  --chart-axis: #64748b;
+  --chart-bar: #6366f1;
+  --chart-bar-to: #a78bfa;
+  --chart-grid: #1f1f2e;
+  --chart-axis: #6a6a7e;
 }
 
 html,
@@ -65,11 +65,32 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 /* angka rata kolom */
 .tabular {
   font-variant-numeric: tabular-nums;
 }
 
-* {
-  box-sizing: border-box;
+/* fokus keyboard yang jelas & berkarakter */
+:focus-visible {
+  outline: 2px solid rgb(var(--brand));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* glow indigo halus di belakang hero — kedalaman "bold" tanpa kesan flat */
+.hero-glow {
+  position: relative;
+  isolation: isolate;
+}
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -45% -15% 35% -15%;
+  background: radial-gradient(48% 60% at 28% 0%, rgb(var(--brand) / 0.18), transparent 70%);
+  pointer-events: none;
 }

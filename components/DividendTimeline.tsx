@@ -3,6 +3,7 @@ import { formatTanggal, formatRupiah, formatPersen } from "@/lib/format";
 import { sortByDateDesc } from "@/lib/derive";
 import { TipeBadge, ConfidenceBadge } from "./Badges";
 import InfoTip from "./ui/InfoTip";
+import { ExternalLink } from "./ui/icons";
 
 function hostname(url: string): string {
   try {
@@ -20,12 +21,12 @@ export default function DividendTimeline({ events }: { events: DividendEvent[] }
   return (
     <ol className="space-y-3">
       {sorted.map((e, i) => (
-        <li key={i} className="rounded-2xl border border-line bg-surface p-3 shadow-card">
+        <li key={i} className="rounded-xl border border-line bg-surface p-3 shadow-card">
           <div className="flex flex-wrap items-center gap-2">
             <TipeBadge tipe={e.tipe} />
-            <span className="font-semibold text-fg">{e.tahun}</span>
+            <span className="font-display font-semibold text-fg">{e.tahun}</span>
             <span className="ml-auto text-right">
-              <span className="tabular text-lg font-bold text-brand-strong">
+              <span className="font-display tabular text-lg font-bold text-brand-strong">
                 {formatRupiah(e.dps_idr)}
               </span>
               <span className="text-xs text-faint"> / lembar</span>
@@ -86,9 +87,9 @@ export default function DividendTimeline({ events }: { events: DividendEvent[] }
                   href={u}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-brand hover:underline"
+                  className="inline-flex items-center gap-1 text-xs text-brand hover:underline"
                 >
-                  🔗 {hostname(u)}
+                  <ExternalLink size={12} /> {hostname(u)}
                 </a>
               ))}
             </div>

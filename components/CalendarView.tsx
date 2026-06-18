@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { BULAN_ID, HARI_ID_SINGKAT } from "@/lib/format";
+import { ChevronLeft, ChevronRight } from "./ui/icons";
 
 export interface CalEvent {
   date: string; // ISO YYYY-MM-DD
@@ -75,12 +76,13 @@ export default function CalendarView({
       <div className="flex items-center justify-between">
         <button
           onClick={() => shift(-1)}
-          className="rounded-lg border border-line px-3 py-1 text-sm text-fg transition hover:bg-surface-2"
+          aria-label="Bulan sebelumnya"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition hover:border-brand/40 hover:text-fg"
         >
-          ← Sebelumnya
+          <ChevronLeft size={18} />
         </button>
         <div className="text-center">
-          <div className="text-lg font-semibold text-fg">
+          <div className="font-display text-lg font-semibold text-fg">
             {BULAN_ID[m]} {y}
           </div>
           <button onClick={goToday} className="text-xs text-brand hover:underline">
@@ -89,9 +91,10 @@ export default function CalendarView({
         </div>
         <button
           onClick={() => shift(1)}
-          className="rounded-lg border border-line px-3 py-1 text-sm text-fg transition hover:bg-surface-2"
+          aria-label="Bulan berikutnya"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition hover:border-brand/40 hover:text-fg"
         >
-          Berikutnya →
+          <ChevronRight size={18} />
         </button>
       </div>
 

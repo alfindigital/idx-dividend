@@ -1,4 +1,5 @@
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "./Badges";
+import { BookOpen, ChevronDown } from "./ui/icons";
 
 function Row({ title, children }: { title: React.ReactNode; children: React.ReactNode }) {
   return (
@@ -12,12 +13,13 @@ function Row({ title, children }: { title: React.ReactNode; children: React.Reac
 /** Legenda + glosarium singkat untuk pembaca awam (collapsible, default tertutup). */
 export default function DashboardGuide() {
   return (
-    <details className="group rounded-2xl border border-line bg-surface p-4 shadow-card">
+    <details className="group rounded-xl border border-line bg-surface p-4 shadow-card">
       <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-fg">
-        <span>📖 Panduan singkat: cara membaca tabel</span>
-        <span className="text-faint transition group-open:rotate-180" aria-hidden="true">
-          ▾
+        <span className="inline-flex items-center gap-2">
+          <BookOpen size={17} className="text-brand" />
+          Panduan singkat: cara membaca tabel
         </span>
+        <ChevronDown size={18} className="text-faint transition group-open:rotate-180" />
       </summary>
       <div className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
         <Row title="Yield berjalan">

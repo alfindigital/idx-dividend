@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Info } from "./icons";
 
 /**
  * Tooltip penjelas istilah — ramah pemula & aksesibel.
@@ -56,9 +57,9 @@ export default function InfoTip({
         }}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
-        className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-faint/60 text-[10px] font-bold leading-none text-faint transition hover:border-brand hover:text-brand"
+        className="inline-flex items-center justify-center text-faint transition hover:text-brand"
       >
-        i
+        <Info size={14} />
       </button>
       {open && (
         <span
