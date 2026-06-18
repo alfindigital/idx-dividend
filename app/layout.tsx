@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
+import HeaderNav from "@/components/HeaderNav";
 import BottomNav from "@/components/BottomNav";
+import SiteFooter from "@/components/SiteFooter";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -19,7 +21,7 @@ const grotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Dividen IDX — History & Kalender",
+  title: "Dividen IDX · History & Kalender",
   description:
     "Riwayat dividen 5 tahun & perkiraan jadwal dividen berikutnya untuk emiten IDX berdividen besar.",
 };
@@ -38,14 +40,12 @@ function LogoMark() {
   return (
     <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <rect width="32" height="32" rx="8" fill="url(#lg)" />
-      <path
-        d="M8 20.5l4.5-4.5 3 3 5.5-6.5"
-        stroke="white"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="21" cy="12.5" r="2.1" fill="white" />
+      <g fill="white">
+        <rect x="7" y="16" width="3.6" height="8.5" rx="1.4" />
+        <rect x="13.8" y="12" width="3.6" height="12.5" rx="1.4" />
+        <rect x="20.6" y="8" width="3.6" height="16.5" rx="1.4" />
+      </g>
+      <circle cx="22.4" cy="6" r="2.1" fill="#fde68a" />
       <defs>
         <linearGradient id="lg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
           <stop stopColor="#4f46e5" />
@@ -62,45 +62,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <header className="sticky top-0 z-20 border-b border-line bg-bg/70 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5">
+          <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-2.5">
             <Link href="/" className="flex items-center gap-2">
               <LogoMark />
               <span className="font-display text-lg font-bold tracking-tight text-fg">
                 Dividen<span className="text-brand">IDX</span>
               </span>
             </Link>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <nav className="hidden items-center gap-1 text-sm font-medium sm:flex">
-                <Link
-                  href="/"
-                  className="rounded-md px-3 py-1.5 text-muted transition hover:bg-surface-2 hover:text-fg"
-                >
-                  Beranda
-                </Link>
-                <Link
-                  href="/kalender"
-                  className="rounded-md px-3 py-1.5 text-muted transition hover:bg-surface-2 hover:text-fg"
-                >
-                  Kalender
-                </Link>
-              </nav>
+            <div className="flex items-center gap-1.5">
+              <HeaderNav />
               <ThemeToggle />
             </div>
           </div>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
-        <footer className="mt-12 border-t border-line pb-24 pt-6 text-xs text-muted sm:pb-6">
-          <div className="mx-auto max-w-6xl space-y-1 px-4">
-            <p>
-              Data dikumpulkan dari sumber publik dan dapat mengandung kekeliruan. Selalu verifikasi
-              ke sumber resmi (IDX/KSEI/IR perusahaan) sebelum mengambil keputusan.
-            </p>
-            <p>
-              Prediksi tanggal bersifat <strong>perkiraan</strong> berbasis pola historis, bukan
-              kepastian. Halaman ini <strong>bukan saran investasi</strong>.
-            </p>
-          </div>
-        </footer>
+        <main className="mx-auto max-w-[1600px] px-4 py-6">{children}</main>
+        <SiteFooter />
         <BottomNav />
       </body>
     </html>

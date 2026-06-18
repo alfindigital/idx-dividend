@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { labelTipe } from "@/lib/format";
-import { ArrowUpRight, ArrowDownRight, ArrowRight } from "./ui/icons";
+import { ArrowUpRight, ArrowDownRight, ArrowRight, Sparkles, AlertTriangle } from "./ui/icons";
 
 function Pill({
   children,
@@ -93,6 +93,25 @@ export function ConfidenceBadge({ value }: { value?: string }) {
     <Pill className={m.c} dot={m.dot}>
       keyakinan {value}
     </Pill>
+  );
+}
+
+/** Penanda ringkas berbentuk ikon (inline, tidak memakan baris) untuk tabel. */
+export function FlagIcons({ dormant, special }: { dormant: boolean; special: boolean }) {
+  if (!dormant && !special) return null;
+  return (
+    <span className="inline-flex items-center gap-1">
+      {dormant && (
+        <span className="text-rose-500" title="Dorman / potensi rapel">
+          <AlertTriangle size={13} />
+        </span>
+      )}
+      {special && (
+        <span className="text-fuchsia-500" title="Pernah bagi dividen spesial">
+          <Sparkles size={13} />
+        </span>
+      )}
+    </span>
   );
 }
 

@@ -66,6 +66,13 @@ export const Info = (p: IconProps) => (
   </Svg>
 );
 
+export const HelpCircle = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9.5" />
+    <path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3M12 17h.01" />
+  </Svg>
+);
+
 export const AlertTriangle = (p: IconProps) => (
   <Svg {...p}>
     <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
@@ -83,6 +90,31 @@ export const BookOpen = (p: IconProps) => (
 export const ChevronDown = (p: IconProps) => (
   <Svg {...p}>
     <path d="m6 9 6 6 6-6" />
+  </Svg>
+);
+
+export const ChevronUp = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m18 15-6-6-6 6" />
+  </Svg>
+);
+
+export const ChevronsUpDown = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m7 15 5 5 5-5M7 9l5-5 5 5" />
+  </Svg>
+);
+
+export const ArrowUpDown = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m21 16-4 4-4-4M17 20V4M3 8l4-4 4 4M7 4v16" />
+  </Svg>
+);
+
+export const Sparkles = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 3l1.9 5.2 5.2 1.9-5.2 1.9L12 17l-1.9-5L5 10.1l5.1-1.9z" />
+    <path d="M19 14v4M21 16h-4" />
   </Svg>
 );
 
