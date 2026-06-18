@@ -103,7 +103,6 @@ const SORT_PRESETS: { value: string; label: string }[] = [
   { value: "ticker:asc", label: "Kode A-Z" },
 ];
 
-const PAGE = 20;
 const STORAGE_KEY = "idx-colfrac-v1";
 
 function predLabel(dateIso: string | null, bulanLabel: string | null): string {
@@ -127,10 +126,11 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [updatedTs, setUpdatedTs] = useState<number | null>(null);
   const [q, setQ] = useState("");
   const [sektors, setSektors] = useState<string[]>([]);
-  const [onlyDormant, setOnlyDormant] = useState(false);
+  const [minYield, setMinYield] = useState("");
+  const [minDiv, setMinDiv] = useState("");
+  const [trend, setTrend] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "yield", dir: "desc" });
   const [fracs, setFracs] = useState<number[]>(DEFAULT_FRACS);
-  const [visible, setVisible] = useState(PAGE);
   const tableRef = useRef<HTMLTableElement>(null);
 
   useEffect(() => {
@@ -197,10 +197,14 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   });
   type Row = (typeof enriched)[number];
 
+  const minY = parseFloat(minYield);
+  const minD = parseFloat(minDiv);
   const filtered = enriched
     .filter((r) => (q ? (r.ticker + " " + r.nama).toLowerCase().includes(q.toLowerCase()) : true))
     .filter((r) => (sektors.length ? sektors.includes(r.sektor) : true))
-    .filter((r) => (onlyDormant ? r.dormant : true));
+    .filter((r) => (!Number.isNaN(minY) ? (r.displayYield ?? -Infinity) >= minY : true))
+    .filter((r) => (!Number.isNaN(minD) ? (r.lastAnnualTotal ?? -Infinity) >= minD : true))
+    .filter((r) => (trend ? r.trend === trend : true));
 
   function sortVal(r: Row, key: SortKey): string | number {
     switch (key) {
@@ -228,13 +232,6 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
       typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv));
     return sort.dir === "asc" ? c : -c;
   });
-
-  // reset pagination saat filter berubah
-  useEffect(() => {
-    setVisible(PAGE);
-  }, [q, sektors, onlyDormant]);
-
-  const shown = sorted.slice(0, visible);
 
   function toggleSort(key?: SortKey) {
     if (!key) return;
@@ -277,17 +274,17 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
 
   const statusNote =
     priceState === "loading"
-      ? "memuat harga…"
+      ? "mengambil harga…"
       : priceState === "ok"
-        ? `Yield = berjalan (harga terkini${
+        ? `yield = dividen 12bln ÷ harga terkini${
             updatedTs
-              ? `, diperbarui ${new Date(updatedTs).toLocaleTimeString("id-ID", {
+              ? ` · ${new Date(updatedTs).toLocaleTimeString("id-ID", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })}`
               : ""
-          })`
-        : "Harga live tak tersedia, yield = data terakhir";
+          }`
+        : "harga live tak tersedia · yield = data terakhir";
 
   function renderCell(col: Col, r: Row) {
     switch (col.id) {
@@ -352,7 +349,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
       {/* kontrol — menempel di bawah header saat di-scroll */}
       <div className="sticky top-12 z-10 -mx-4 border-b border-line/60 bg-bg/85 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-bg/65">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-          <div className="relative w-full sm:w-60">
+          <div className="relative w-full sm:w-52">
             <Search
               size={15}
               className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
@@ -369,8 +366,42 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
             selected={sektors}
             onChange={setSektors}
             allLabel="Semua sektor"
-            className="w-full sm:w-48"
+            className="w-full sm:w-44"
           />
+          {/* ambang minimal yield & dividen */}
+          <div className="flex gap-2">
+            <input
+              value={minYield}
+              onChange={(e) => setMinYield(e.target.value)}
+              inputMode="decimal"
+              placeholder="Yield ≥ %"
+              className="w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint sm:w-24"
+            />
+            <input
+              value={minDiv}
+              onChange={(e) => setMinDiv(e.target.value)}
+              inputMode="decimal"
+              placeholder="Div ≥ Rp"
+              className="w-full rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint sm:w-24"
+            />
+          </div>
+          {/* filter tren */}
+          <div className="relative w-full sm:w-36">
+            <select
+              value={trend}
+              onChange={(e) => setTrend(e.target.value)}
+              className="w-full appearance-none rounded-lg border border-line bg-surface py-1.5 pl-3 pr-8 text-sm text-fg"
+            >
+              <option value="">Semua tren</option>
+              <option value="Naik">Tren naik</option>
+              <option value="Stabil">Tren stabil</option>
+              <option value="Turun">Tren turun</option>
+            </select>
+            <ChevronDown
+              size={15}
+              className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
+            />
+          </div>
           {/* urut: hanya di mobile (desktop pakai klik header) */}
           <div className="relative w-full sm:hidden">
             <ArrowUpDown
@@ -399,16 +430,9 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
               className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
             />
           </div>
-          <label className="flex items-center gap-1.5 text-sm text-muted">
-            <input
-              type="checkbox"
-              checked={onlyDormant}
-              onChange={(e) => setOnlyDormant(e.target.checked)}
-              className="accent-brand"
-            />
-            Hanya dorman
-          </label>
-          <span className="inline-flex items-center gap-1.5 text-xs text-faint sm:ml-auto">
+          <span className="inline-flex flex-wrap items-center gap-x-1.5 text-xs text-faint sm:ml-auto">
+            <span className="font-medium text-muted">{sorted.length} emiten</span>
+            <span aria-hidden="true">·</span>
             {priceState === "loading" && (
               <span className="h-2 w-2 animate-pulse rounded-full bg-brand/60" aria-hidden="true" />
             )}
@@ -491,7 +515,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
                 </tr>
               </thead>
               <tbody>
-                {shown.map((r) => (
+                {sorted.map((r) => (
                   <tr
                     key={r.ticker}
                     className="group border-b border-line/70 last:border-0 hover:bg-brand/5"
@@ -514,26 +538,9 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
 
           {/* kartu — layar < sm */}
           <div className="grid gap-2 sm:hidden">
-            {shown.map((r) => (
+            {sorted.map((r) => (
               <MobileCard key={r.ticker} r={r} yieldClass={yieldClass} />
             ))}
-          </div>
-
-          {/* pagination */}
-          <div className="flex flex-col items-center gap-2 pt-1 text-xs text-faint">
-            <span>
-              Menampilkan {shown.length} dari {sorted.length} emiten
-            </span>
-            {visible < sorted.length && (
-              <button
-                type="button"
-                onClick={() => setVisible((v) => v + PAGE)}
-                className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-4 py-2 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-brand/5"
-              >
-                Tampilkan {Math.min(PAGE, sorted.length - visible)} lagi
-                <ChevronDown size={15} />
-              </button>
-            )}
           </div>
         </>
       )}

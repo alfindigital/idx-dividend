@@ -48,13 +48,6 @@ export default function Page() {
   cap.setDate(cap.getDate() + 60);
   const capIso = cap.toISOString().slice(0, 10);
 
-  let topYield: { ticker: string; pct: number } | null = null;
-  for (const r of rows) {
-    if (r.lastYieldPct != null && (!topYield || r.lastYieldPct > topYield.pct)) {
-      topYield = { ticker: r.ticker, pct: r.lastYieldPct };
-    }
-  }
-
   let nextEx: { ticker: string; date: string } | null = null;
   for (const d of dividendList) {
     const iso = eventDate(d);
@@ -67,7 +60,6 @@ export default function Page() {
     emiten: rows.length,
     events: dividendList.length,
     teratur: rows.filter((r) => r.timing === "Sangat teratur" || r.timing === "Cukup teratur").length,
-    topYield,
     nextEx,
     pred60: rows.filter((r) => r.nextPredDate && r.nextPredDate >= todayIso && r.nextPredDate <= capIso)
       .length,

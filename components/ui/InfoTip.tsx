@@ -28,7 +28,8 @@ export default function InfoTip({
     if (!el) return;
     const r = el.getBoundingClientRect();
     const vw = window.innerWidth;
-    let left = r.left + r.width / 2 - WIDTH / 2;
+    // selalu buka ke kanan (tepi kiri tooltip sejajar ikon), clamp agar tak keluar layar
+    let left = r.left;
     left = Math.max(8, Math.min(left, vw - WIDTH - 8));
     setPos({ left, top: r.bottom + 6 });
   }
