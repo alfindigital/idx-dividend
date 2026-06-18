@@ -212,7 +212,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
         <>
           {/* tabel — layar ≥ sm */}
           <div className="hidden overflow-x-auto rounded-2xl border border-line bg-surface shadow-card sm:block">
-            <table className="min-w-full text-sm">
+            <table className="min-w-full text-sm [&_td]:whitespace-nowrap [&_th]:whitespace-nowrap">
               <thead className="bg-surface-2 text-muted">
                 <tr className="text-left">
                   <th className="px-3 py-2 font-semibold">Emiten</th>

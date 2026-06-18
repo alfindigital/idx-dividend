@@ -1,9 +1,5 @@
 import EmitenTable, { DashboardRow } from "@/components/EmitenTable";
-import Disclaimer from "@/components/Disclaimer";
-import DashboardGuide from "@/components/DashboardGuide";
-import Link from "next/link";
-import { emitenList, dividendList, getDividends } from "@/lib/data";
-import { ArrowRight } from "@/components/ui/icons";
+import { emitenList, getDividends } from "@/lib/data";
 import {
   latestAnnual,
   ttmDividend,
@@ -59,29 +55,7 @@ export default function Page() {
           Riwayat ~5 tahun, skor konsistensi &amp; tren jumlah, yield berjalan dari harga terkini,
           dan perkiraan kapan dividen berikutnya kemungkinan dibagikan.
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium">
-          <span className="rounded-md border border-line bg-surface px-2.5 py-1 text-muted">
-            <strong className="tabular text-fg">{emitenList.length}</strong> emiten
-          </span>
-          <span className="rounded-md border border-line bg-surface px-2.5 py-1 text-muted">
-            <strong className="tabular text-fg">{dividendList.length}</strong> event dividen
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 text-muted">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
-            harga live
-          </span>
-          <Link
-            href="/kalender"
-            className="inline-flex items-center gap-1 px-1 font-semibold text-brand transition hover:gap-1.5"
-          >
-            Buka kalender <ArrowRight size={14} />
-          </Link>
-        </div>
       </section>
-
-      <Disclaimer />
-
-      <DashboardGuide />
 
       <EmitenTable rows={rows} />
     </div>

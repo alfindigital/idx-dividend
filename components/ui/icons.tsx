@@ -66,6 +66,13 @@ export const Info = (p: IconProps) => (
   </Svg>
 );
 
+export const HelpCircle = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9.5" />
+    <path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3M12 17h.01" />
+  </Svg>
+);
+
 export const AlertTriangle = (p: IconProps) => (
   <Svg {...p}>
     <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />

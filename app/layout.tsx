@@ -3,7 +3,9 @@ import Link from "next/link";
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
+import HeaderNav from "@/components/HeaderNav";
 import BottomNav from "@/components/BottomNav";
+import SiteFooter from "@/components/SiteFooter";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -62,45 +64,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <header className="sticky top-0 z-20 border-b border-line bg-bg/70 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
-          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5">
             <Link href="/" className="flex items-center gap-2">
               <LogoMark />
               <span className="font-display text-lg font-bold tracking-tight text-fg">
                 Dividen<span className="text-brand">IDX</span>
               </span>
             </Link>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <nav className="hidden items-center gap-1 text-sm font-medium sm:flex">
-                <Link
-                  href="/"
-                  className="rounded-md px-3 py-1.5 text-muted transition hover:bg-surface-2 hover:text-fg"
-                >
-                  Beranda
-                </Link>
-                <Link
-                  href="/kalender"
-                  className="rounded-md px-3 py-1.5 text-muted transition hover:bg-surface-2 hover:text-fg"
-                >
-                  Kalender
-                </Link>
-              </nav>
+            <div className="flex items-center gap-1.5">
+              <HeaderNav />
               <ThemeToggle />
             </div>
           </div>
         </header>
-        <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
-        <footer className="mt-12 border-t border-line pb-24 pt-6 text-xs text-muted sm:pb-6">
-          <div className="mx-auto max-w-6xl space-y-1 px-4">
-            <p>
-              Data dikumpulkan dari sumber publik dan dapat mengandung kekeliruan. Selalu verifikasi
-              ke sumber resmi (IDX/KSEI/IR perusahaan) sebelum mengambil keputusan.
-            </p>
-            <p>
-              Prediksi tanggal bersifat <strong>perkiraan</strong> berbasis pola historis, bukan
-              kepastian. Halaman ini <strong>bukan saran investasi</strong>.
-            </p>
-          </div>
-        </footer>
+        <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>
+        <SiteFooter />
         <BottomNav />
       </body>
     </html>

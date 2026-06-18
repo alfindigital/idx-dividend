@@ -10,10 +10,10 @@ function Row({ title, children }: { title: React.ReactNode; children: React.Reac
   );
 }
 
-/** Legenda + glosarium singkat untuk pembaca awam (collapsible, default tertutup). */
-export default function DashboardGuide() {
+/** Legenda + glosarium singkat untuk pembaca awam (collapsible). */
+export default function DashboardGuide({ open = false }: { open?: boolean }) {
   return (
-    <details className="group rounded-xl border border-line bg-surface p-4 shadow-card">
+    <details open={open} className="group rounded-xl border border-line bg-surface p-4 shadow-card">
       <summary className="flex cursor-pointer list-none items-center justify-between font-semibold text-fg">
         <span className="inline-flex items-center gap-2">
           <BookOpen size={17} className="text-brand" />
