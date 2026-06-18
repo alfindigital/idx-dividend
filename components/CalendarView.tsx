@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { BULAN_ID, HARI_ID_SINGKAT } from "@/lib/format";
+import { ChevronLeft, ChevronRight } from "./ui/icons";
 
 export interface CalEvent {
   date: string; // ISO YYYY-MM-DD
@@ -75,12 +76,13 @@ export default function CalendarView({
       <div className="flex items-center justify-between">
         <button
           onClick={() => shift(-1)}
-          className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-50"
+          aria-label="Bulan sebelumnya"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition hover:border-brand/40 hover:text-fg"
         >
-          ← Sebelumnya
+          <ChevronLeft size={18} />
         </button>
         <div className="text-center">
-          <div className="text-lg font-semibold text-slate-800">
+          <div className="font-display text-lg font-semibold text-fg">
             {BULAN_ID[m]} {y}
           </div>
           <button onClick={goToday} className="text-xs text-brand hover:underline">
@@ -89,13 +91,14 @@ export default function CalendarView({
         </div>
         <button
           onClick={() => shift(1)}
-          className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-50"
+          aria-label="Bulan berikutnya"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition hover:border-brand/40 hover:text-fg"
         >
-          Berikutnya →
+          <ChevronRight size={18} />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-slate-400">
+      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-faint">
         {HARI_ID_SINGKAT.map((h) => (
           <div key={h}>{h}</div>
         ))}
@@ -103,18 +106,19 @@ export default function CalendarView({
 
       <div className="grid grid-cols-7 gap-1">
         {cells.map((d, i) => {
-          if (d == null) return <div key={i} className="min-h-[64px] rounded bg-slate-50/50" />;
+          if (d == null)
+            return <div key={i} className="min-h-[64px] rounded-lg bg-surface-2/40" />;
           const iso = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
           const evs = byDate.get(iso) ?? [];
           const isToday = iso === todayIso;
           return (
             <div
               key={i}
-              className={`min-h-[64px] rounded border p-1 ${
-                isToday ? "border-brand bg-brand/5" : "border-slate-100 bg-white"
+              className={`min-h-[64px] rounded-lg border p-1 ${
+                isToday ? "border-brand bg-brand/10" : "border-line bg-surface"
               }`}
             >
-              <div className="text-[11px] text-slate-400">{d}</div>
+              <div className="text-[11px] text-faint">{d}</div>
               <div className="mt-0.5 space-y-0.5">
                 {evs.slice(0, 4).map((e, j) => (
                   <Link
@@ -123,8 +127,8 @@ export default function CalendarView({
                     title={`${e.ticker} — ${e.tipe} (${e.kind})`}
                     className={`block truncate rounded px-1 text-[10px] leading-tight ${
                       e.kind === "prediksi"
-                        ? "border border-dashed border-amber-400 text-amber-700"
-                        : "bg-brand/10 text-brand-dark"
+                        ? "border border-dashed border-amber-400 text-amber-700 dark:text-amber-300"
+                        : "bg-brand/10 text-brand-strong"
                     }`}
                   >
                     {e.ticker}
@@ -132,7 +136,7 @@ export default function CalendarView({
                   </Link>
                 ))}
                 {evs.length > 4 && (
-                  <div className="text-[10px] text-slate-400">+{evs.length - 4} lagi</div>
+                  <div className="text-[10px] text-faint">+{evs.length - 4} lagi</div>
                 )}
               </div>
             </div>
@@ -141,14 +145,12 @@ export default function CalendarView({
       </div>
 
       {monthHasEvents === 0 && (
-        <p className="text-center text-sm text-slate-400">
-          Tidak ada event dividen di bulan ini.
-        </p>
+        <p className="text-center text-sm text-faint">Tidak ada event dividen di bulan ini.</p>
       )}
 
-      <div className="flex flex-wrap gap-3 text-xs text-slate-500">
+      <div className="flex flex-wrap gap-3 text-xs text-muted">
         <span className="flex items-center gap-1">
-          <span className="inline-block h-3 w-3 rounded bg-brand/10" /> ex-date historis
+          <span className="inline-block h-3 w-3 rounded bg-brand/20" /> ex-date historis
         </span>
         <span className="flex items-center gap-1">
           <span className="inline-block h-3 w-3 rounded border border-dashed border-amber-400" />{" "}

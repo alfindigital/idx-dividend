@@ -1,8 +1,10 @@
 import EmitenTable, { DashboardRow } from "@/components/EmitenTable";
 import Disclaimer from "@/components/Disclaimer";
-import { emitenList, getDividends } from "@/lib/data";
+import DashboardGuide from "@/components/DashboardGuide";
+import Link from "next/link";
+import { emitenList, dividendList, getDividends } from "@/lib/data";
+import { ArrowRight } from "@/components/ui/icons";
 import {
-  annualTotals,
   latestAnnual,
   ttmDividend,
   timingConsistency,
@@ -45,22 +47,41 @@ export default function Page() {
 
   return (
     <div className="space-y-5">
-      <section className="space-y-2">
-        <h1 className="text-2xl font-bold text-slate-900">
-          History & Kalender Dividen Saham IDX
+      <section className="hero-glow pt-2">
+        <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
+          <span className="h-1.5 w-1.5 rounded-full bg-brand" aria-hidden="true" />
+          Data Dividen IDX
+        </span>
+        <h1 className="mt-3 font-display text-3xl font-bold leading-[1.1] tracking-tight text-fg sm:text-[2.6rem]">
+          Lacak history &amp; jadwal dividen saham IDX
         </h1>
-        <p className="text-sm text-slate-600 max-w-3xl">
-          Riwayat dividen ~5 tahun terakhir untuk emiten IDX berdividen besar, lengkap dengan
-          skor konsistensi waktu & jumlah, yield berjalan (harga terkini), dan perkiraan kapan
-          dividen berikutnya kemungkinan dibagikan. Klik kode emiten untuk detail, atau buka{" "}
-          <a href="/kalender" className="text-brand hover:underline">
-            tampilan kalender
-          </a>
-          .
+        <p className="mt-3 max-w-2xl text-sm text-muted sm:text-base">
+          Riwayat ~5 tahun, skor konsistensi &amp; tren jumlah, yield berjalan dari harga terkini,
+          dan perkiraan kapan dividen berikutnya kemungkinan dibagikan.
         </p>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-medium">
+          <span className="rounded-md border border-line bg-surface px-2.5 py-1 text-muted">
+            <strong className="tabular text-fg">{emitenList.length}</strong> emiten
+          </span>
+          <span className="rounded-md border border-line bg-surface px-2.5 py-1 text-muted">
+            <strong className="tabular text-fg">{dividendList.length}</strong> event dividen
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-2.5 py-1 text-muted">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" aria-hidden="true" />
+            harga live
+          </span>
+          <Link
+            href="/kalender"
+            className="inline-flex items-center gap-1 px-1 font-semibold text-brand transition hover:gap-1.5"
+          >
+            Buka kalender <ArrowRight size={14} />
+          </Link>
+        </div>
       </section>
 
       <Disclaimer />
+
+      <DashboardGuide />
 
       <EmitenTable rows={rows} />
     </div>

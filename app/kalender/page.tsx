@@ -2,6 +2,7 @@ import Link from "next/link";
 import CalendarView, { CalEvent } from "@/components/CalendarView";
 import { emitenList, dividendList, getDividends } from "@/lib/data";
 import { predictNext, eventDate } from "@/lib/derive";
+import { ArrowLeft, Download } from "@/components/ui/icons";
 
 export const revalidate = 43200;
 
@@ -29,14 +30,17 @@ export default function Page() {
   return (
     <div className="space-y-4">
       <div>
-        <Link href="/" className="text-sm text-brand hover:underline">
-          ← Kembali ke daftar
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
+        >
+          <ArrowLeft size={15} /> Kembali ke daftar
         </Link>
       </div>
 
       <header className="space-y-2">
-        <h1 className="text-2xl font-bold text-slate-900">Kalender Dividen</h1>
-        <p className="text-sm text-slate-600 max-w-3xl">
+        <h1 className="font-display text-2xl font-bold tracking-tight text-fg">Kalender Dividen</h1>
+        <p className="max-w-3xl text-sm text-muted">
           Tanggal <strong>ex-dividend</strong> historis (warna solid) dan{" "}
           <strong>perkiraan</strong> tanggal berikutnya berbasis pola musiman (garis putus,
           bertanda <code>?</code>). Bulan ramai dividen biasanya Maret–Juli (final) dan
@@ -44,9 +48,9 @@ export default function Page() {
         </p>
         <a
           href="/api/ics"
-          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+          className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-surface-2"
         >
-          ⬇️ Unduh semua jadwal mendatang (.ics)
+          <Download size={15} /> Unduh semua jadwal mendatang (.ics)
         </a>
       </header>
 

@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "./Badges";
+import InfoTip from "./ui/InfoTip";
+import { Search, ChevronDown, ChevronRight } from "./ui/icons";
 import { formatPersen, formatTanggalSingkat, formatRupiah, BULAN_ID_SINGKAT } from "@/lib/format";
 
 export interface DashboardRow {
@@ -30,6 +32,9 @@ function predLabel(dateIso: string | null, bulanLabel: string | null): string {
   const d = new Date(dateIso);
   return `${bulanLabel ?? BULAN_ID_SINGKAT[d.getMonth()]} ${d.getFullYear()}`;
 }
+
+const inputClass =
+  "rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-fg placeholder:text-faint";
 
 export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [prices, setPrices] = useState<Record<string, number | null>>({});
@@ -107,133 +112,274 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     }
   });
 
+  type Row = (typeof sorted)[number];
+
+  const yieldClass = (y: number) =>
+    y >= 6 ? "text-emerald-600 dark:text-emerald-400" : "text-fg";
+
+  const statusNote =
+    priceState === "loading"
+      ? "memuat harga…"
+      : priceState === "ok"
+        ? `yield = berjalan (harga terkini${
+            updatedTs
+              ? " · diperbarui " +
+                new Date(updatedTs).toLocaleTimeString("id-ID", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : ""
+          })`
+        : "harga live tak tersedia — yield = data terakhir";
+
   return (
     <div className="space-y-3">
-      {/* kontrol */}
-      <div className="flex flex-wrap items-center gap-2">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Cari kode / nama…"
-          className="rounded-md border border-slate-300 px-3 py-1.5 text-sm w-44"
-        />
-        <select
-          value={sektor}
-          onChange={(e) => setSektor(e.target.value)}
-          className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-        >
-          <option value="">Semua sektor</option>
-          {sectors.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <select
-          value={sortKey}
-          onChange={(e) => setSortKey(e.target.value as SortKey)}
-          className="rounded-md border border-slate-300 px-2 py-1.5 text-sm"
-        >
-          <option value="yield">Urut: Yield tertinggi</option>
-          <option value="next">Urut: Dividen terdekat</option>
-          <option value="lastEx">Urut: Pembagian terakhir</option>
-          <option value="yearsPaid">Urut: Paling konsisten (thn bayar)</option>
-          <option value="ticker">Urut: Kode (A–Z)</option>
-        </select>
-        <label className="flex items-center gap-1 text-sm text-slate-600">
-          <input
-            type="checkbox"
-            checked={onlyDormant}
-            onChange={(e) => setOnlyDormant(e.target.checked)}
-          />
-          Hanya dorman / rapel
-        </label>
-        <span className="text-xs text-slate-400 ml-auto">
-          {priceState === "loading" && "memuat harga…"}
-          {priceState === "ok" &&
-            `yield = berjalan (harga terkini${
-              updatedTs
-                ? " · diperbarui " +
-                  new Date(updatedTs).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
-                : ""
-            })`}
-          {priceState === "fail" && "harga live tak tersedia — yield = data terakhir"}
-        </span>
+      {/* kontrol — menempel di bawah header saat di-scroll */}
+      <div className="sticky top-12 z-10 -mx-4 border-b border-line/60 bg-bg/85 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-bg/65">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="relative w-full sm:w-52">
+            <Search
+              size={15}
+              className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-faint"
+            />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Cari kode / nama…"
+              className={`${inputClass} w-full pl-8`}
+            />
+          </div>
+          <div className="flex gap-2">
+            <div className="relative min-w-0 flex-1 sm:flex-none">
+              <select
+                value={sektor}
+                onChange={(e) => setSektor(e.target.value)}
+                className={`${inputClass} w-full appearance-none pr-8`}
+              >
+                <option value="">Semua sektor</option>
+                {sectors.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown
+                size={15}
+                className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
+              />
+            </div>
+            <div className="relative min-w-0 flex-1 sm:flex-none">
+              <select
+                value={sortKey}
+                onChange={(e) => setSortKey(e.target.value as SortKey)}
+                className={`${inputClass} w-full appearance-none pr-8`}
+              >
+                <option value="yield">Urut: Yield tertinggi</option>
+                <option value="next">Urut: Dividen terdekat</option>
+                <option value="lastEx">Urut: Pembagian terakhir</option>
+                <option value="yearsPaid">Urut: Paling konsisten</option>
+                <option value="ticker">Urut: Kode (A–Z)</option>
+              </select>
+              <ChevronDown
+                size={15}
+                className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-faint"
+              />
+            </div>
+          </div>
+          <label className="flex items-center gap-1 text-sm text-muted">
+            <input
+              type="checkbox"
+              checked={onlyDormant}
+              onChange={(e) => setOnlyDormant(e.target.checked)}
+              className="accent-brand"
+            />
+            Hanya dorman / rapel
+          </label>
+          <span className="inline-flex items-center gap-1 text-xs text-faint sm:ml-auto">
+            {priceState === "loading" && (
+              <span className="h-2 w-2 animate-pulse rounded-full bg-brand/60" aria-hidden="true" />
+            )}
+            {statusNote}
+          </span>
+        </div>
       </div>
 
-      {/* tabel */}
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-        <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 text-slate-600">
-            <tr className="text-left">
-              <th className="px-3 py-2 font-semibold">Emiten</th>
-              <th className="px-3 py-2 font-semibold">Sektor</th>
-              <th className="px-3 py-2 font-semibold text-right">Yield</th>
-              <th className="px-3 py-2 font-semibold text-right">Div. terakhir</th>
-              <th className="px-3 py-2 font-semibold">Konsistensi</th>
-              <th className="px-3 py-2 font-semibold">Tren jumlah</th>
-              <th className="px-3 py-2 font-semibold">Ex terakhir</th>
-              <th className="px-3 py-2 font-semibold">Perkiraan berikutnya</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((r) => (
-              <tr key={r.ticker} className="border-t border-slate-100 hover:bg-slate-50">
-                <td className="px-3 py-2">
-                  <Link href={`/emiten/${r.ticker}`} className="font-semibold text-brand-dark hover:underline">
-                    {r.ticker}
-                  </Link>
-                  <div className="text-xs text-slate-500 max-w-[200px] truncate">{r.nama}</div>
-                  <div className="mt-0.5 flex flex-wrap gap-1">
-                    <FlagBadge dormant={r.dormant} special={r.special} />
-                  </div>
-                </td>
-                <td className="px-3 py-2 text-slate-600">{r.sektor}</td>
-                <td className="px-3 py-2 text-right font-semibold">
-                  {r.displayYield != null ? (
-                    <span className={r.displayYield >= 6 ? "text-emerald-700" : "text-slate-700"}>
-                      {formatPersen(r.displayYield)}
+      {sorted.length === 0 ? (
+        <div className="rounded-2xl border border-line bg-surface p-6 text-center text-sm text-faint shadow-card">
+          Tidak ada emiten yang cocok dengan filter.
+        </div>
+      ) : (
+        <>
+          {/* tabel — layar ≥ sm */}
+          <div className="hidden overflow-x-auto rounded-2xl border border-line bg-surface shadow-card sm:block">
+            <table className="min-w-full text-sm">
+              <thead className="bg-surface-2 text-muted">
+                <tr className="text-left">
+                  <th className="px-3 py-2 font-semibold">Emiten</th>
+                  <th className="px-3 py-2 font-semibold">Sektor</th>
+                  <th className="px-3 py-2 text-right font-semibold">
+                    <span className="inline-flex items-center justify-end gap-1">
+                      Yield
+                      <InfoTip label="Yield berjalan" align="right">
+                        Total dividen 12 bulan terakhir ÷ harga saham sekarang. Hijau = ≥ 6%.
+                      </InfoTip>
                     </span>
-                  ) : (
-                    "—"
-                  )}
-                  {!r.yieldFromLive && r.displayYield != null && (
-                    <div className="text-[10px] font-normal text-slate-400">terakhir</div>
-                  )}
-                </td>
-                <td className="px-3 py-2 text-right text-slate-700">
-                  {formatRupiah(r.lastAnnualTotal)}
-                  {r.lastYear && <div className="text-[10px] text-slate-400">{r.lastYear}</div>}
-                </td>
-                <td className="px-3 py-2">
-                  <ConsistencyBadge value={r.timing} />
-                </td>
-                <td className="px-3 py-2">
-                  <TrendBadge value={r.trend} />
-                </td>
-                <td className="px-3 py-2 text-slate-600">{formatTanggalSingkat(r.lastExDate)}</td>
-                <td className="px-3 py-2">
-                  {r.dormant ? (
-                    <span className="text-xs text-rose-600">tak ada pola — potensi rapel</span>
-                  ) : (
-                    <span className="text-slate-700">{predLabel(r.nextPredDate, r.nextPredLabel)}</span>
-                  )}
-                </td>
-              </tr>
+                  </th>
+                  <th className="px-3 py-2 text-right font-semibold">Div. terakhir</th>
+                  <th className="px-3 py-2 font-semibold">
+                    <span className="inline-flex items-center gap-1">
+                      Konsistensi
+                      <InfoTip label="Konsistensi waktu">
+                        Seberapa teratur emiten membagikan dividen pada periode yang mirip tiap tahun.
+                      </InfoTip>
+                    </span>
+                  </th>
+                  <th className="px-3 py-2 font-semibold">
+                    <span className="inline-flex items-center gap-1">
+                      Tren jumlah
+                      <InfoTip label="Tren jumlah">
+                        Arah besaran dividen per lembar dari tahun ke tahun: naik, stabil, atau turun.
+                      </InfoTip>
+                    </span>
+                  </th>
+                  <th className="px-3 py-2 font-semibold">Ex terakhir</th>
+                  <th className="px-3 py-2 font-semibold">
+                    <span className="inline-flex items-center gap-1">
+                      Perkiraan berikutnya
+                      <InfoTip label="Perkiraan berikutnya">
+                        Tebakan bulan ex-date berikutnya berdasarkan pola historis — bukan kepastian.
+                      </InfoTip>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((r) => (
+                  <tr key={r.ticker} className="border-t border-line hover:bg-surface-2">
+                    <td className="px-3 py-2">
+                      <Link
+                        href={`/emiten/${r.ticker}`}
+                        className="font-semibold text-brand-strong hover:underline"
+                      >
+                        {r.ticker}
+                      </Link>
+                      <div className="max-w-[200px] truncate text-xs text-muted">{r.nama}</div>
+                      <div className="mt-0.5 flex flex-wrap gap-1">
+                        <FlagBadge dormant={r.dormant} special={r.special} />
+                      </div>
+                    </td>
+                    <td className="px-3 py-2 text-muted">{r.sektor}</td>
+                    <td className="px-3 py-2 text-right font-semibold tabular">
+                      {r.displayYield != null ? (
+                        <span className={yieldClass(r.displayYield)}>
+                          {formatPersen(r.displayYield)}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                      {!r.yieldFromLive && r.displayYield != null && (
+                        <div className="text-[10px] font-normal text-faint">terakhir</div>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-right text-fg tabular">
+                      {formatRupiah(r.lastAnnualTotal)}
+                      {r.lastYear && <div className="text-[10px] text-faint">{r.lastYear}</div>}
+                    </td>
+                    <td className="px-3 py-2">
+                      <ConsistencyBadge value={r.timing} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <TrendBadge value={r.trend} />
+                    </td>
+                    <td className="px-3 py-2 text-muted">{formatTanggalSingkat(r.lastExDate)}</td>
+                    <td className="px-3 py-2">
+                      {r.dormant ? (
+                        <span className="text-xs text-rose-600 dark:text-rose-400">
+                          tak ada pola — potensi rapel
+                        </span>
+                      ) : (
+                        <span className="text-fg">
+                          {predLabel(r.nextPredDate, r.nextPredLabel)}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* kartu — layar < sm */}
+          <div className="grid gap-2 sm:hidden">
+            {sorted.map((r) => (
+              <MobileCard key={r.ticker} r={r} yieldClass={yieldClass} />
             ))}
-            {sorted.length === 0 && (
-              <tr>
-                <td colSpan={8} className="px-3 py-6 text-center text-slate-400">
-                  Tidak ada emiten yang cocok dengan filter.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      <p className="text-xs text-slate-400">
-        Klik kode emiten untuk lihat riwayat lengkap, grafik, dan sumber data.
+          </div>
+        </>
+      )}
+
+      <p className="text-xs text-faint">
+        Ketuk kode emiten untuk lihat riwayat lengkap, grafik, dan sumber data.
       </p>
     </div>
   );
+
+  function MobileCard({ r, yieldClass }: { r: Row; yieldClass: (y: number) => string }) {
+    return (
+      <Link
+        href={`/emiten/${r.ticker}`}
+        className="block rounded-xl border border-line bg-surface p-3 shadow-card transition hover:border-brand/40 active:bg-surface-2"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="font-display font-bold text-fg">{r.ticker}</div>
+            <div className="truncate text-xs text-muted">{r.nama}</div>
+          </div>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <div className="text-right">
+              <div
+                className={`font-display text-lg font-bold tabular ${r.displayYield != null ? yieldClass(r.displayYield) : "text-fg"}`}
+              >
+                {r.displayYield != null ? formatPersen(r.displayYield) : "—"}
+              </div>
+              <div className="text-[10px] text-faint">
+                {r.yieldFromLive ? "yield berjalan" : "yield terakhir"}
+              </div>
+            </div>
+            <ChevronRight size={16} className="text-faint" />
+          </div>
+        </div>
+
+        {(r.timing !== "Data kurang" || r.trend !== "Data kurang" || r.dormant || r.special) && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            <ConsistencyBadge value={r.timing} />
+            <TrendBadge value={r.trend} />
+            <FlagBadge dormant={r.dormant} special={r.special} />
+          </div>
+        )}
+
+        <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+          <div>
+            <div className="text-[11px] uppercase tracking-wide text-faint">Div. terakhir</div>
+            <div className="tabular text-fg">
+              {formatRupiah(r.lastAnnualTotal)}
+              {r.lastYear ? <span className="text-faint"> · {r.lastYear}</span> : ""}
+            </div>
+          </div>
+          <div>
+            <div className="text-[11px] uppercase tracking-wide text-faint">Ex terakhir</div>
+            <div className="text-muted">{formatTanggalSingkat(r.lastExDate)}</div>
+          </div>
+          <div className="col-span-2">
+            <div className="text-[11px] uppercase tracking-wide text-faint">Perkiraan berikutnya</div>
+            {r.dormant ? (
+              <div className="text-rose-600 dark:text-rose-400">tak ada pola — potensi rapel</div>
+            ) : (
+              <div className="text-fg">{predLabel(r.nextPredDate, r.nextPredLabel)}</div>
+            )}
+          </div>
+        </div>
+      </Link>
+    );
+  }
 }

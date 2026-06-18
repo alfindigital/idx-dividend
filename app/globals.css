@@ -2,8 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   Design tokens — "Bold Modern Indigo".
+   Light (default) & dark (.dark pada <html>). Channel RGB agar
+   utility Tailwind tetap bisa pakai opacity (mis. bg-brand/10).
+   ============================================================ */
 :root {
   color-scheme: light;
+
+  --bg: 251 251 253;
+  --surface: 255 255 255;
+  --surface-2: 244 244 247;
+  --border: 231 231 238;
+  --fg: 11 11 20;
+  --muted: 92 92 110;
+  --faint: 156 156 173;
+
+  --brand: 99 102 241; /* indigo-500 */
+  --brand-strong: 79 70 229; /* indigo-600 */
+  --accent: 124 58 237; /* violet-600 */
+
+  /* warna penuh untuk chart (Recharts) */
+  --chart-bar: #4f46e5;
+  --chart-bar-to: #a78bfa;
+  --chart-grid: #e7e7ee;
+  --chart-axis: #9c9cad;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --bg: 8 8 13;
+  --surface: 18 18 25;
+  --surface-2: 28 28 40;
+  --border: 39 39 58;
+  --fg: 236 236 244;
+  --muted: 162 162 181;
+  --faint: 106 106 126;
+
+  --brand: 129 140 248; /* indigo-400 */
+  --brand-strong: 165 180 252; /* indigo-300 */
+  --accent: 167 139 250; /* violet-400 */
+
+  --chart-bar: #6366f1;
+  --chart-bar-to: #a78bfa;
+  --chart-grid: #1f1f2e;
+  --chart-axis: #6a6a7e;
 }
 
 html,
@@ -13,11 +57,40 @@ body {
 }
 
 body {
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: rgb(var(--bg));
+  color: rgb(var(--fg));
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* angka rata kolom */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* fokus keyboard yang jelas & berkarakter */
+:focus-visible {
+  outline: 2px solid rgb(var(--brand));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* glow indigo halus di belakang hero — kedalaman "bold" tanpa kesan flat */
+.hero-glow {
+  position: relative;
+  isolation: isolate;
+}
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -45% -15% 35% -15%;
+  background: radial-gradient(48% 60% at 28% 0%, rgb(var(--brand) / 0.18), transparent 70%);
+  pointer-events: none;
 }
