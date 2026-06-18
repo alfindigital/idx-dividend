@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
+import BottomNav from "@/components/BottomNav";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -62,22 +63,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <Logo />
               <span>Dividen IDX</span>
             </Link>
-            <nav className="flex items-center gap-1 text-sm font-medium sm:gap-2">
-              <Link href="/" className="rounded-full px-3 py-1.5 transition hover:bg-white/10">
-                Beranda
-              </Link>
-              <Link
-                href="/kalender"
-                className="rounded-full px-3 py-1.5 transition hover:bg-white/10"
-              >
-                Kalender
-              </Link>
+            <div className="flex items-center gap-1 sm:gap-2">
+              <nav className="hidden items-center gap-1 text-sm font-medium sm:flex">
+                <Link href="/" className="rounded-full px-3 py-1.5 transition hover:bg-white/10">
+                  Beranda
+                </Link>
+                <Link
+                  href="/kalender"
+                  className="rounded-full px-3 py-1.5 transition hover:bg-white/10"
+                >
+                  Kalender
+                </Link>
+              </nav>
               <ThemeToggle />
-            </nav>
+            </div>
           </div>
         </header>
         <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
-        <footer className="mt-12 border-t border-line py-6 text-xs text-muted">
+        <footer className="mt-12 border-t border-line pb-24 pt-6 text-xs text-muted sm:pb-6">
           <div className="mx-auto max-w-6xl space-y-1 px-4">
             <p>
               ⚠️ Data dikumpulkan dari sumber publik dan dapat mengandung kekeliruan. Selalu
@@ -89,6 +92,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </p>
           </div>
         </footer>
+        <BottomNav />
       </body>
     </html>
   );
