@@ -224,10 +224,10 @@
     "sektor": "Konsumer (Rokok)",
     "papan": "Utama",
     "flags": {
-      "dormant": false,
+      "dormant": true,
       "special_history": false
     },
-    "pola_pembayaran": "Satu dividen final/tahun (~Juli). Pernah SKIP dividen (tahun buku 2019 → tidak bayar 2020; tahun buku 2023 → tidak bayar 2024). DPS menurun tajam.",
+    "pola_pembayaran": "Satu dividen final/tahun (~Juli), tapi makin tidak teratur. Pernah SKIP (tahun buku 2019 → tidak bayar 2020; tahun buku 2023 → tidak bayar 2024). Tahun buku 2025: RUPST 23 Juni 2026 digelar TANPA agenda dividen tunai (laba bersih turun ke ~Rp1,56 T) → tidak bagi dividen. DPS menurun tajam.",
     "sumber": [
       "https://stockanalysis.com/quote/idx/GGRM/dividend/",
       "https://www.investing.com/equities/gudang-garam-t-dividends"
@@ -634,7 +634,7 @@
     "sektor": "Telekomunikasi",
     "papan": "Utama",
     "flags": {
-      "dormant": false,
+      "dormant": true,
       "special_history": true
     },
     "pola_pembayaran": "Resume dividen sejak TB2019 (final tahunan ~Apr-Jun, payout ~50%). 2025 ada final April + dividen SPESIAL Des (pasca-merger XLSMART, efektif 16 Apr 2025). TB2025 TIDAK bagi dividen (RUPS 20 Mei 2026; rugi bersih induk krn depresiasi dipercepat aset jaringan pasca-merger).",
