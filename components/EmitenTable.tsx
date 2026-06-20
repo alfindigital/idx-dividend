@@ -15,6 +15,7 @@ import {
   ChevronsUpDown,
   ChevronRight,
   ArrowUpRight,
+  Download,
   Star,
 } from "./ui/icons";
 import { useWatchlist } from "@/lib/useWatchlist";
@@ -118,6 +119,11 @@ function predLabel(dateIso: string | null, bulanLabel: string | null): string {
 
 function defaultDir(key: SortKey): Dir {
   return key === "ticker" || key === "sektor" || key === "next" ? "asc" : "desc";
+}
+
+function csvCell(v: string | number): string {
+  const s = String(v ?? "");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 function yieldColor(y: number): string {
@@ -294,18 +300,21 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     document.body.style.userSelect = "none";
   }
 
-  const statusNote = loading
+  const timeStr = updatedTs
+    ? new Date(updatedTs).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+    : "";
+  const statusFull = loading
     ? "mengambil harga…"
     : priceState === "ok"
-      ? `yield = dividen 12bln ÷ harga terkini${
-          updatedTs
-            ? ` · ${new Date(updatedTs).toLocaleTimeString("id-ID", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}`
-            : ""
-        }`
+      ? `yield = dividen 12bln ÷ harga terkini${timeStr ? ` · ${timeStr}` : ""}`
       : "harga live tak tersedia · yield = data terakhir";
+  const statusShort = loading
+    ? "memuat…"
+    : priceState === "ok"
+      ? timeStr
+        ? `harga ${timeStr}`
+        : "harga live"
+      : "harga tak tersedia";
 
   // chip filter aktif
   const activeFilters: { key: string; label: string; clear: () => void }[] = [];
@@ -327,6 +336,45 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     setMinDiv("");
     setTrend("");
     setOnlyWatchlist(false);
+  }
+
+  function exportCsv() {
+    const header = [
+      "Ticker",
+      "Nama",
+      "Sektor",
+      "Yield (%)",
+      "Yield live",
+      "Div terakhir (Rp)",
+      "Tahun",
+      "Konsistensi",
+      "Tren",
+      "Ex terakhir",
+      "Perkiraan berikutnya",
+    ];
+    const body = sorted.map((r) => [
+      r.ticker,
+      r.nama,
+      r.sektor,
+      r.displayYield != null ? r.displayYield.toFixed(2) : "",
+      r.yieldFromLive ? "ya" : "tidak",
+      r.lastAnnualTotal != null ? String(r.lastAnnualTotal) : "",
+      r.lastYear ?? "",
+      r.timing,
+      r.trend,
+      r.lastExDate ?? "",
+      r.dormant ? "tak ada pola" : predLabel(r.nextPredDate, r.nextPredLabel),
+    ]);
+    const csv = [header, ...body].map((row) => row.map(csvCell).join(",")).join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `dividen-idx-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
   function renderCell(col: Col, r: Row) {
@@ -508,6 +556,15 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
             onReset={resetAll}
           />
 
+          <button
+            type="button"
+            onClick={exportCsv}
+            title="Unduh CSV (sesuai filter)"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-sm text-muted transition hover:border-brand/40 hover:text-fg sm:w-auto"
+          >
+            <Download size={15} /> CSV
+          </button>
+
           <span className="inline-flex flex-wrap items-center gap-x-1.5 text-xs text-faint sm:ml-auto">
             <span className="font-medium text-muted">{sorted.length} emiten</span>
             <span aria-hidden="true">·</span>
@@ -517,7 +574,8 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
             {priceState === "ok" && (
               <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
             )}
-            {statusNote}
+            <span className="hidden sm:inline">{statusFull}</span>
+            <span className="sm:hidden">{statusShort}</span>
           </span>
         </div>
 

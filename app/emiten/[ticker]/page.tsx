@@ -10,6 +10,11 @@ import {
   sortByDateDesc,
   ttmDividend,
   eventDate,
+  dpsCagr,
+  yieldStats,
+  avgAnnualTotal,
+  payingStreak,
+  favoriteExMonth,
 } from "@/lib/derive";
 import ChartSwitcher from "@/components/ChartSwitcher";
 import DividendTimeline from "@/components/DividendTimeline";
@@ -25,7 +30,7 @@ import {
   BarChart3,
 } from "@/components/ui/icons";
 import { gcalUrl } from "@/lib/ics";
-import { BULAN_ID, labelTipe, formatRupiah, formatTanggal } from "@/lib/format";
+import { BULAN_ID, labelTipe, formatRupiah, formatPersen, formatTanggal } from "@/lib/format";
 
 export const revalidate = 43200;
 export const dynamicParams = false;
@@ -40,6 +45,28 @@ function StatCard({ label, children }: { label: string; children: React.ReactNod
       <CardLabel>{label}</CardLabel>
       <div className="mt-1 text-sm font-semibold text-fg">{children}</div>
     </Card>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  sub,
+  className,
+}: {
+  label: string;
+  value: React.ReactNode;
+  sub?: string;
+  className?: string;
+}) {
+  return (
+    <div>
+      <div className="text-[11px] uppercase tracking-wide text-faint">{label}</div>
+      <div className={`mt-0.5 font-display text-base font-semibold tabular ${className ?? "text-fg"}`}>
+        {value}
+      </div>
+      {sub ? <div className="text-[11px] text-muted">{sub}</div> : null}
+    </div>
   );
 }
 
@@ -65,6 +92,13 @@ export default function Page({ params }: { params: { ticker: string } }) {
   const yieldSeries = Array.from(yieldByYear.entries())
     .map(([tahun, y]) => ({ tahun, yield: Math.round(y * 100) / 100 }))
     .sort((a, b) => a.tahun - b.tahun);
+
+  // analitik mendalam
+  const cagr = dpsCagr(divs);
+  const yStats = yieldStats(divs);
+  const avgAnnual = avgAnnualTotal(divs);
+  const streak = payingStreak(divs);
+  const favMonth = favoriteExMonth(divs);
 
   // Event terdekat untuk tombol "Tambah ke Google Calendar":
   // utamakan event terumumkan yang belum lewat, jika tak ada pakai perkiraan terdekat.
@@ -136,6 +170,37 @@ export default function Page({ params }: { params: { ticker: string } }) {
           <TrendBadge value={trend} />
         </StatCard>
         <StatCard label="Tahun membagikan (data)">{yp} tahun</StatCard>
+      </section>
+
+      {/* analisis mendalam */}
+      <section>
+        <h2 className="mb-2 flex items-center gap-2 font-display text-lg font-semibold text-fg">
+          <BarChart3 size={18} className="text-brand" /> Analisis dividen
+        </h2>
+        <Card className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3 lg:grid-cols-5">
+          <Metric
+            label="Yield rata-rata"
+            value={yStats ? formatPersen(yStats.avg) : "-"}
+            sub={yStats ? `${formatPersen(yStats.min)} s/d ${formatPersen(yStats.max)}` : undefined}
+          />
+          <Metric
+            label="Pertumbuhan DPS"
+            value={cagr != null ? `${cagr >= 0 ? "+" : ""}${formatPersen(cagr)}/th` : "-"}
+            className={
+              cagr == null
+                ? "text-fg"
+                : cagr > 0
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : cagr < 0
+                    ? "text-rose-600 dark:text-rose-400"
+                    : "text-fg"
+            }
+            sub="CAGR antar tahun"
+          />
+          <Metric label="Rata-rata dividen/th" value={formatRupiah(avgAnnual)} sub="per lembar" />
+          <Metric label="Beruntun membagikan" value={`${streak} tahun`} sub="terkini" />
+          <Metric label="Bulan ex favorit" value={favMonth ?? "-"} sub="paling sering" />
+        </Card>
       </section>
 
       {/* prediksi + ekspor berdampingan */}
