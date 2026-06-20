@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarDays, HelpCircle } from "./ui/icons";
+import { Home, CalendarDays, Columns, HelpCircle } from "./ui/icons";
 
 const base =
   "h-9 w-9 items-center justify-center rounded-md border transition";
@@ -18,6 +18,7 @@ export default function HeaderNav() {
   const path = usePathname();
   const homeActive = path === "/" || path.startsWith("/emiten");
   const calActive = path.startsWith("/kalender");
+  const bandingActive = path.startsWith("/banding");
   const panduanActive = path.startsWith("/panduan");
 
   return (
@@ -39,6 +40,15 @@ export default function HeaderNav() {
         className={`hidden sm:inline-flex ${base} ${tone(calActive)}`}
       >
         <CalendarDays size={18} />
+      </Link>
+      <Link
+        href="/banding"
+        aria-label="Bandingkan emiten"
+        title="Bandingkan emiten"
+        aria-current={bandingActive ? "page" : undefined}
+        className={`hidden sm:inline-flex ${base} ${tone(bandingActive)}`}
+      >
+        <Columns size={18} />
       </Link>
       <Link
         href="/panduan"
