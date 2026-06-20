@@ -1,8 +1,20 @@
 "use client";
 
 import { useRef, useState } from "react";
-import DividendChart, { ChartPoint } from "./DividendChart";
-import DividendYieldChart, { YieldPoint } from "./DividendYieldChart";
+import dynamic from "next/dynamic";
+import type { ChartPoint } from "./DividendChart";
+import type { YieldPoint } from "./DividendYieldChart";
+import ChartSkeleton from "./ui/ChartSkeleton";
+
+// Lazy-load recharts agar tidak masuk bundel awal halaman detail.
+const DividendChart = dynamic(() => import("./DividendChart"), {
+  ssr: false,
+  loading: () => <ChartSkeleton />,
+});
+const DividendYieldChart = dynamic(() => import("./DividendYieldChart"), {
+  ssr: false,
+  loading: () => <ChartSkeleton />,
+});
 
 export default function ChartSwitcher({
   dps,

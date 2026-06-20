@@ -1,6 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
+
+const NAV_LINKS = [
+  { href: "/", label: "Beranda" },
+  { href: "/sektor", label: "Sektor" },
+  { href: "/leaderboard", label: "Leaderboard" },
+  { href: "/kalender", label: "Kalender" },
+  { href: "/banding", label: "Bandingkan" },
+  { href: "/istilah", label: "Istilah" },
+  { href: "/panduan", label: "Panduan" },
+];
 
 const SOCIALS = [
   {
@@ -75,6 +86,16 @@ export default function SiteFooter() {
   return (
     <footer className="relative mt-10 overflow-hidden border-t border-line bg-surface pb-20 sm:pb-0">
       <span className="afd-glow" ref={glowRef} aria-hidden="true" />
+      <nav
+        aria-label="Tautan situs"
+        className="relative z-[1] mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-4 gap-y-1.5 border-b border-line px-4 py-2.5 text-xs"
+      >
+        {NAV_LINKS.map((l) => (
+          <Link key={l.href} href={l.href} className="text-muted transition hover:text-brand">
+            {l.label}
+          </Link>
+        ))}
+      </nav>
       <div className="relative z-[1] mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-3 px-4 py-2.5">
         <span className="afd-cr">
           © {year}

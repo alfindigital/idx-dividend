@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarDays, Columns, HelpCircle } from "./ui/icons";
+import { Home, CalendarDays, Layers, Trophy, Columns, HelpCircle } from "./ui/icons";
 
 const base =
   "h-9 w-9 items-center justify-center rounded-md border transition";
@@ -18,6 +18,8 @@ export default function HeaderNav() {
   const path = usePathname();
   const homeActive = path === "/" || path.startsWith("/emiten");
   const calActive = path.startsWith("/kalender");
+  const sektorActive = path.startsWith("/sektor");
+  const leaderboardActive = path.startsWith("/leaderboard");
   const bandingActive = path.startsWith("/banding");
   const panduanActive = path.startsWith("/panduan");
 
@@ -40,6 +42,24 @@ export default function HeaderNav() {
         className={`hidden sm:inline-flex ${base} ${tone(calActive)}`}
       >
         <CalendarDays size={18} />
+      </Link>
+      <Link
+        href="/sektor"
+        aria-label="Sektor"
+        title="Sektor"
+        aria-current={sektorActive ? "page" : undefined}
+        className={`hidden sm:inline-flex ${base} ${tone(sektorActive)}`}
+      >
+        <Layers size={18} />
+      </Link>
+      <Link
+        href="/leaderboard"
+        aria-label="Leaderboard"
+        title="Leaderboard"
+        aria-current={leaderboardActive ? "page" : undefined}
+        className={`hidden sm:inline-flex ${base} ${tone(leaderboardActive)}`}
+      >
+        <Trophy size={18} />
       </Link>
       <Link
         href="/banding"

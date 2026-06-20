@@ -5,6 +5,7 @@ import Link from "next/link";
 import { BULAN_ID, HARI_ID_SINGKAT } from "@/lib/format";
 import { ChevronLeft, ChevronRight, CalendarDays, X } from "./ui/icons";
 import { useFocusTrap } from "@/lib/useFocusTrap";
+import YearHeatmap from "./YearHeatmap";
 
 function EventChip({ e }: { e: CalEvent }) {
   return (
@@ -43,6 +44,7 @@ export default function CalendarView({
 }) {
   const [y, setY] = useState(initialYear);
   const [m, setM] = useState(initialMonth);
+  const [view, setView] = useState<"bulan" | "tahun">("bulan");
   const [openDay, setOpenDay] = useState<string | null>(null);
   const popRef = useRef<HTMLDivElement>(null);
   useFocusTrap(popRef, openDay !== null, () => setOpenDay(null));
@@ -108,17 +110,57 @@ export default function CalendarView({
 
   const navBtn =
     "inline-flex h-9 w-9 items-center justify-center rounded-md border border-line text-muted transition hover:border-brand/40 hover:text-fg";
+  const tabBtn = (selected: boolean) =>
+    `rounded-md px-3 py-1 transition ${
+      selected ? "bg-surface text-fg shadow-card" : "text-muted hover:text-fg"
+    }`;
 
   return (
     <div className="rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4">
-      {/* nav bulan */}
+      {/* toggle tampilan */}
+      <div
+        role="tablist"
+        aria-label="Tampilan kalender"
+        className="mb-3 inline-flex rounded-lg border border-line bg-surface-2 p-0.5 text-xs font-medium"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "bulan"}
+          onClick={() => setView("bulan")}
+          className={tabBtn(view === "bulan")}
+        >
+          Bulan
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={view === "tahun"}
+          onClick={() => setView("tahun")}
+          className={tabBtn(view === "tahun")}
+        >
+          Tahun
+        </button>
+      </div>
+
+      {/* nav periode */}
       <div className="mb-3 flex items-center justify-between">
-        <button onClick={() => shift(-1)} aria-label="Bulan sebelumnya" className={navBtn}>
+        <button
+          onClick={() => (view === "bulan" ? shift(-1) : setY(y - 1))}
+          aria-label={view === "bulan" ? "Bulan sebelumnya" : "Tahun sebelumnya"}
+          className={navBtn}
+        >
           <ChevronLeft size={18} />
         </button>
         <div className="flex items-center gap-3">
           <h2 className="font-display text-lg font-semibold text-fg sm:text-xl">
-            {BULAN_ID[m]} <span className="text-muted">{y}</span>
+            {view === "bulan" ? (
+              <>
+                {BULAN_ID[m]} <span className="text-muted">{y}</span>
+              </>
+            ) : (
+              y
+            )}
           </h2>
           <button
             onClick={goToday}
@@ -127,11 +169,29 @@ export default function CalendarView({
             Hari ini
           </button>
         </div>
-        <button onClick={() => shift(1)} aria-label="Bulan berikutnya" className={navBtn}>
+        <button
+          onClick={() => (view === "bulan" ? shift(1) : setY(y + 1))}
+          aria-label={view === "bulan" ? "Bulan berikutnya" : "Tahun berikutnya"}
+          className={navBtn}
+        >
           <ChevronRight size={18} />
         </button>
       </div>
 
+      {view === "tahun" ? (
+        <YearHeatmap
+          events={events}
+          year={y}
+          todayIso={todayIso}
+          onPickDay={(iso) => {
+            const [yy, mm] = iso.split("-").map(Number);
+            setY(yy);
+            setM(mm - 1);
+            setView("bulan");
+          }}
+        />
+      ) : (
+      <>
       {/* hari */}
       <div className="grid grid-cols-7 gap-1.5">
         {HARI_ID_SINGKAT.map((h, i) => (
@@ -225,6 +285,8 @@ export default function CalendarView({
           <CalendarDays size={16} />
           Tidak ada event dividen di {BULAN_ID[m]} {y}.
         </div>
+      )}
+      </>
       )}
 
       {/* legenda */}

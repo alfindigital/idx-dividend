@@ -27,6 +27,8 @@ import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
 import { Card, CardLabel } from "@/components/ui/Card";
 import { CalendarDays, BarChart3, ArrowUpRight } from "@/components/ui/icons";
 import { gcalUrl } from "@/lib/ics";
+import { sektorSlug } from "@/lib/slug";
+import { SITE_URL } from "@/lib/site";
 import { BULAN_ID, labelTipe, formatRupiah, formatPersen, formatTanggal } from "@/lib/format";
 
 export const revalidate = 43200;
@@ -43,7 +45,7 @@ export function generateMetadata({ params }: { params: { ticker: string } }): Me
   const totals = annualTotals(divs);
   const la = totals.length ? totals[totals.length - 1] : null;
   const lastYield = sortByDateDesc(divs).find((d) => d.yield_pct != null)?.yield_pct ?? null;
-  const title = `${e.ticker} — ${e.nama}`;
+  const title = `${e.ticker} - ${e.nama}`;
   const divTxt = la ? ` Dividen terakhir ${formatRupiah(la.total)}/lembar (${la.tahun}).` : "";
   const yieldTxt =
     lastYield != null
@@ -157,12 +159,52 @@ export default function Page({ params }: { params: { ticker: string } }) {
     };
   }
 
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: emiten.sektor,
+          item: `${SITE_URL}/sektor/${sektorSlug(emiten.sektor)}`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: emiten.ticker,
+          item: `${SITE_URL}/emiten/${emiten.ticker}`,
+        },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      name: `Riwayat dividen ${emiten.ticker} (${emiten.nama})`,
+      description: `Riwayat dividen ~5 tahun, yield, konsistensi, dan perkiraan jadwal dividen ${emiten.ticker} di IDX.`,
+      url: `${SITE_URL}/emiten/${emiten.ticker}`,
+      inLanguage: "id-ID",
+      keywords: ["dividen", emiten.ticker, emiten.nama, emiten.sektor, "yield", "jadwal dividen"],
+      ...(totals.length
+        ? { temporalCoverage: `${totals[0].tahun}/${totals[totals.length - 1].tahun}` }
+        : {}),
+      creator: { "@type": "Organization", name: "alfindigital", url: "https://alfindigital.com" },
+      publisher: { "@type": "Organization", name: "alfindigital", url: "https://alfindigital.com" },
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-5xl space-y-5">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Breadcrumbs
         items={[
           { label: "Beranda", href: "/" },
-          { label: emiten.sektor },
+          { label: emiten.sektor, href: `/sektor/${sektorSlug(emiten.sektor)}` },
           { label: emiten.ticker },
         ]}
       />

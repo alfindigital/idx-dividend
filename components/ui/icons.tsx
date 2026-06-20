@@ -194,6 +194,23 @@ export const Layers = (p: IconProps) => (
   </Svg>
 );
 
+export const Trophy = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+    <path d="M4 22h16M10 14.7V18c0 .6-.5 1-1 1.2C7.9 19.6 7 20.7 7 22M14 14.7V18c0 .6.5 1 1 1.2 1.1.4 2 1.5 2 2.8" />
+    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+  </Svg>
+);
+
+export const Grid = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="3" y="3" width="7.5" height="7.5" rx="1.5" />
+    <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5" />
+    <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5" />
+    <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5" />
+  </Svg>
+);
+
 export const BarChart3 = (p: IconProps) => (
   <Svg {...p}>
     <path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3" />

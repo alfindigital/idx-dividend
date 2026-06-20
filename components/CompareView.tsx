@@ -2,21 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Legend,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { ConsistencyBadge, TrendBadge } from "./Badges";
 import { Search, X, ArrowUpRight, Layers } from "./ui/icons";
 import { Skeleton } from "./ui/Skeleton";
 import EmptyState from "./ui/EmptyState";
 import { formatPersen, formatRupiah } from "@/lib/format";
+
+// Lazy-load grafik (recharts) agar tidak masuk bundel awal halaman banding.
+const CompareChart = dynamic(() => import("./CompareChart"), {
+  ssr: false,
+  loading: () => <Skeleton className="block h-72 w-full rounded-xl" />,
+});
 
 export interface CompareEmiten {
   ticker: string;
@@ -317,50 +314,7 @@ export default function CompareView({ all }: { all: CompareEmiten[] }) {
                 Riwayat DPS per tahun (Rp)
               </h2>
               <div className="rounded-xl border border-line bg-surface p-4 shadow-card">
-                <div className="h-72 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
-                      <XAxis
-                        dataKey="tahun"
-                        tick={{ fontSize: 12, fill: "var(--chart-axis)" }}
-                        tickLine={{ stroke: "var(--chart-grid)" }}
-                        axisLine={{ stroke: "var(--chart-grid)" }}
-                      />
-                      <YAxis
-                        tick={{ fontSize: 12, fill: "var(--chart-axis)" }}
-                        tickLine={{ stroke: "var(--chart-grid)" }}
-                        axisLine={{ stroke: "var(--chart-grid)" }}
-                        width={46}
-                        tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          background: "rgb(var(--surface))",
-                          border: "1px solid rgb(var(--border))",
-                          borderRadius: 12,
-                          color: "rgb(var(--fg))",
-                          fontSize: 12,
-                        }}
-                        labelStyle={{ color: "rgb(var(--muted))" }}
-                        formatter={(val: number) => "Rp " + val.toLocaleString("id-ID")}
-                        labelFormatter={(l) => `Tahun ${l}`}
-                      />
-                      <Legend wrapperStyle={{ fontSize: 12 }} />
-                      {chosen.map((e, i) => (
-                        <Line
-                          key={e.ticker}
-                          type="monotone"
-                          dataKey={e.ticker}
-                          stroke={COLORS[i]}
-                          strokeWidth={2}
-                          dot={{ r: 2 }}
-                          connectNulls
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                <CompareChart chartData={chartData} series={chosen} colors={COLORS} />
               </div>
             </div>
           )}

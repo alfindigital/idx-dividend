@@ -8,6 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import SiteFooter from "@/components/SiteFooter";
 import TopProgress from "@/components/TopProgress";
 import ToastViewport from "@/components/ui/Toast";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -29,7 +30,7 @@ const DESC =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "Dividen IDX — History, Yield & Kalender Dividen Saham IDX",
+    default: "Dividen IDX - History, Yield & Kalender Dividen Saham IDX",
     template: "%s · Dividen IDX",
   },
   description: DESC,
@@ -52,12 +53,12 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: "id_ID",
     url: SITE_URL,
-    title: "Dividen IDX — History, Yield & Kalender Dividen Saham IDX",
+    title: "Dividen IDX - History, Yield & Kalender Dividen Saham IDX",
     description: DESC,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dividen IDX — History, Yield & Kalender Dividen Saham IDX",
+    title: "Dividen IDX - History, Yield & Kalender Dividen Saham IDX",
     description: DESC,
   },
   robots: { index: true, follow: true },
@@ -117,6 +118,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
         <TopProgress />
+        <ServiceWorkerRegistrar />
         <header className="sticky top-0 z-20 border-b border-line bg-bg/70 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
           <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-2.5">
             <Link href="/" className="flex items-center gap-2">
