@@ -1,9 +1,27 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { BULAN_ID, HARI_ID_SINGKAT } from "@/lib/format";
-import { ChevronLeft, ChevronRight } from "./ui/icons";
+import { ChevronLeft, ChevronRight, CalendarDays, X } from "./ui/icons";
+import { useFocusTrap } from "@/lib/useFocusTrap";
+
+function EventChip({ e }: { e: CalEvent }) {
+  return (
+    <Link
+      href={`/emiten/${e.ticker}`}
+      title={`${e.ticker} · ${e.tipe} (${e.kind})`}
+      className={`truncate rounded px-1 py-0.5 text-[10px] font-medium leading-tight transition ${
+        e.kind === "prediksi"
+          ? "border border-dashed border-violet-400 text-violet-600 hover:bg-violet-500/10 dark:text-violet-300"
+          : "bg-brand/15 text-brand-strong hover:bg-brand/25"
+      }`}
+    >
+      {e.ticker}
+      {e.kind === "prediksi" ? " ?" : ""}
+    </Link>
+  );
+}
 
 export interface CalEvent {
   date: string; // ISO YYYY-MM-DD
@@ -25,6 +43,24 @@ export default function CalendarView({
 }) {
   const [y, setY] = useState(initialYear);
   const [m, setM] = useState(initialMonth);
+  const [openDay, setOpenDay] = useState<string | null>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(popRef, openDay !== null, () => setOpenDay(null));
+
+  // tutup popover hari saat klik di luar
+  useEffect(() => {
+    if (openDay === null) return;
+    const onDoc = (ev: MouseEvent) => {
+      if (popRef.current && !popRef.current.contains(ev.target as Node)) setOpenDay(null);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [openDay]);
+
+  // tutup popover saat ganti bulan
+  useEffect(() => {
+    setOpenDay(null);
+  }, [y, m]);
 
   const byDate = useMemo(() => {
     const map = new Map<string, CalEvent[]>();
@@ -115,10 +151,11 @@ export default function CalendarView({
           const evs = byDate.get(iso) ?? [];
           const isToday = iso === todayIso;
           const weekend = i % 7 === 0;
+          const isOpen = openDay === iso;
           return (
             <div
               key={i}
-              className={`flex min-h-[78px] flex-col gap-1 rounded-lg border p-1.5 transition ${
+              className={`relative flex min-h-[78px] flex-col gap-1 rounded-lg border p-1.5 transition ${
                 isToday
                   ? "border-brand bg-brand/5"
                   : "border-line bg-surface hover:border-brand/30"
@@ -137,32 +174,61 @@ export default function CalendarView({
               </div>
               <div className="flex flex-col gap-0.5">
                 {evs.slice(0, 3).map((e, j) => (
-                  <Link
-                    key={j}
-                    href={`/emiten/${e.ticker}`}
-                    title={`${e.ticker} · ${e.tipe} (${e.kind})`}
-                    className={`truncate rounded px-1 py-0.5 text-[10px] font-medium leading-tight transition ${
-                      e.kind === "prediksi"
-                        ? "border border-dashed border-violet-400 text-violet-600 hover:bg-violet-500/10 dark:text-violet-300"
-                        : "bg-brand/15 text-brand-strong hover:bg-brand/25"
-                    }`}
-                  >
-                    {e.ticker}
-                    {e.kind === "prediksi" ? " ?" : ""}
-                  </Link>
+                  <EventChip key={j} e={e} />
                 ))}
                 {evs.length > 3 && (
-                  <div className="px-1 text-[10px] text-faint">+{evs.length - 3} lagi</div>
+                  <button
+                    type="button"
+                    onClick={() => setOpenDay(isOpen ? null : iso)}
+                    aria-expanded={isOpen}
+                    aria-label={`Lihat ${evs.length} event tanggal ${d} ${BULAN_ID[m]}`}
+                    className="rounded px-1 py-0.5 text-left text-[10px] font-medium text-faint transition hover:bg-surface-2 hover:text-brand"
+                  >
+                    +{evs.length - 3} lagi
+                  </button>
                 )}
               </div>
+
+              {isOpen && (
+                <div
+                  ref={popRef}
+                  role="dialog"
+                  aria-label={`Event ${d} ${BULAN_ID[m]} ${y}`}
+                  className="animate-pop-in absolute inset-x-0 top-0 z-50 flex flex-col gap-1 rounded-lg border border-line bg-surface p-2 shadow-card"
+                >
+                  <div className="mb-0.5 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-fg">
+                      {d} {BULAN_ID[m]}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setOpenDay(null)}
+                      aria-label="Tutup"
+                      className="text-faint transition hover:text-fg"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                  {evs.map((e, j) => (
+                    <EventChip key={j} e={e} />
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
+      {/* catatan bulan kosong */}
+      {monthCount === 0 && (
+        <div className="mt-3 flex items-center justify-center gap-2 rounded-lg border border-dashed border-line py-4 text-sm text-faint">
+          <CalendarDays size={16} />
+          Tidak ada event dividen di {BULAN_ID[m]} {y}.
+        </div>
+      )}
+
       {/* legenda */}
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line pt-3 text-xs text-muted">
-        {monthCount === 0 && <span className="text-faint">Tidak ada event dividen bulan ini.</span>}
         <span className="ml-auto flex items-center gap-1.5">
           <span className="inline-block h-3 w-3 rounded bg-brand/25" /> ex-date historis
         </span>

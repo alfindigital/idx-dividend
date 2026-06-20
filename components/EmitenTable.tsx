@@ -8,8 +8,10 @@ import MultiSelect from "./MultiSelect";
 import MobileFilterSheet from "./MobileFilterSheet";
 import { Sparkline } from "./ui/Sparkline";
 import { Skeleton } from "./ui/Skeleton";
+import EmptyState from "./ui/EmptyState";
 import {
   Search,
+  SearchX,
   ChevronDown,
   ChevronUp,
   ChevronsUpDown,
@@ -19,6 +21,8 @@ import {
   Star,
 } from "./ui/icons";
 import { useWatchlist } from "@/lib/useWatchlist";
+import { toast } from "@/lib/toast";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { formatPersen, formatTanggalSingkat, formatRupiah, BULAN_ID_SINGKAT } from "@/lib/format";
 
 export interface DashboardRow {
@@ -159,8 +163,11 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
   const [onlyWatchlist, setOnlyWatchlist] = useState(false);
   const [sort, setSort] = useState<{ key: SortKey; dir: Dir }>({ key: "yield", dir: "desc" });
   const [fracs, setFracs] = useState<number[]>(DEFAULT_FRACS);
+  const [removingChip, setRemovingChip] = useState<string | null>(null);
+  const [popped, setPopped] = useState<string | null>(null);
   const tableRef = useRef<HTMLTableElement>(null);
   const watchlist = useWatchlist();
+  const reduced = usePrefersReducedMotion();
 
   useEffect(() => {
     try {
@@ -330,12 +337,27 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     activeFilters.push({ key: "wl", label: "★ Watchlist", clear: () => setOnlyWatchlist(false) });
 
   function resetAll() {
+    const had = activeFilters.length > 0;
     setQ("");
     setSektors([]);
     setMinYield("");
     setMinDiv("");
     setTrend("");
     setOnlyWatchlist(false);
+    if (had) toast("Filter direset.", { tone: "info" });
+  }
+
+  /** Hapus satu chip filter dengan animasi collapse (kecuali reduced-motion). */
+  function removeChip(f: { key: string; clear: () => void }) {
+    if (reduced) {
+      f.clear();
+      return;
+    }
+    setRemovingChip(f.key);
+    window.setTimeout(() => {
+      f.clear();
+      setRemovingChip(null);
+    }, 150);
   }
 
   function exportCsv() {
@@ -375,6 +397,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    toast(`CSV diunduh (${sorted.length} emiten sesuai filter).`, { tone: "success" });
   }
 
   function renderCell(col: Col, r: Row) {
@@ -393,12 +416,18 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
                   e.preventDefault();
                   e.stopPropagation();
                   watchlist.toggle(r.ticker);
+                  setPopped(r.ticker);
                 }}
-                className={`inline-flex shrink-0 items-center justify-center transition ${
+                className={`inline-flex shrink-0 items-center justify-center transition active:scale-90 ${
                   fav ? "text-amber-400" : "text-faint hover:text-amber-400"
                 }`}
               >
-                <Star size={14} filled={fav} />
+                <Star
+                  size={14}
+                  filled={fav}
+                  className={popped === r.ticker ? "animate-star-pop" : ""}
+                  onAnimationEnd={() => setPopped((p) => (p === r.ticker ? null : p))}
+                />
               </button>
               <Link
                 href={`/emiten/${r.ticker}`}
@@ -553,6 +582,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
             setOnlyWatchlist={setOnlyWatchlist}
             watchlistCount={watchlist.list.length}
             activeCount={activeFilters.length}
+            resultCount={sorted.length}
             onReset={resetAll}
           />
 
@@ -586,8 +616,10 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
               <button
                 key={f.key}
                 type="button"
-                onClick={f.clear}
-                className="inline-flex items-center gap-1 rounded-full border border-line bg-surface px-2 py-0.5 text-xs text-muted transition hover:border-brand/40 hover:text-fg"
+                onClick={() => removeChip(f)}
+                className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-line bg-surface px-2 py-0.5 text-xs text-muted transition hover:border-brand/40 hover:text-fg ${
+                  removingChip === f.key ? "chip-collapsing" : ""
+                }`}
               >
                 {f.label}
                 <span className="text-faint">×</span>
@@ -605,14 +637,22 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
       </div>
 
       {sorted.length === 0 ? (
-        <div className="rounded-xl border border-line bg-surface p-6 text-center text-sm text-faint shadow-card">
-          Tidak ada emiten yang cocok dengan filter.
-          {activeFilters.length > 0 && (
-            <button onClick={resetAll} className="ml-1 font-medium text-brand hover:underline">
-              Reset filter
-            </button>
-          )}
-        </div>
+        <EmptyState
+          icon={<SearchX size={22} />}
+          title="Tidak ada emiten yang cocok"
+          description="Coba longgarkan filter atau ubah kata kunci pencarian."
+          action={
+            activeFilters.length > 0 ? (
+              <button
+                type="button"
+                onClick={resetAll}
+                className="rounded-lg border border-line bg-surface px-3 py-1.5 text-sm font-medium text-brand transition hover:border-brand/40"
+              >
+                Reset filter
+              </button>
+            ) : null
+          }
+        />
       ) : (
         <>
           {/* data-grid — layar ≥ sm, fill penuh + kolom Emiten ter-pin saat scroll */}
@@ -739,6 +779,7 @@ function MobileCard({
   fav: boolean;
   onToggleFav: () => void;
 }) {
+  const [pop, setPop] = useState(false);
   return (
     <Link
       href={`/emiten/${r.ticker}`}
@@ -754,10 +795,16 @@ function MobileCard({
                 e.preventDefault();
                 e.stopPropagation();
                 onToggleFav();
+                setPop(true);
               }}
-              className={`shrink-0 transition ${fav ? "text-amber-400" : "text-faint"}`}
+              className={`shrink-0 transition active:scale-90 ${fav ? "text-amber-400" : "text-faint"}`}
             >
-              <Star size={15} filled={fav} />
+              <Star
+                size={15}
+                filled={fav}
+                className={pop ? "animate-star-pop" : ""}
+                onAnimationEnd={() => setPop(false)}
+              />
             </button>
             <span className="font-display font-bold text-brand-strong">{r.ticker}</span>
             <FlagIcons dormant={r.dormant} special={r.special} />

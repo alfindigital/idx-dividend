@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import DashboardGuide from "@/components/DashboardGuide";
-import { ArrowLeft, AlertTriangle } from "@/components/ui/icons";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { AlertTriangle } from "@/components/ui/icons";
 
 export const metadata: Metadata = {
   title: "Panduan & Informasi",
@@ -12,11 +12,7 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="mx-auto max-w-3xl space-y-5">
-      <div>
-        <Link href="/" className="inline-flex items-center gap-1 text-sm text-brand hover:underline">
-          <ArrowLeft size={15} /> Kembali ke daftar
-        </Link>
-      </div>
+      <Breadcrumbs items={[{ label: "Beranda", href: "/" }, { label: "Panduan" }]} />
 
       <header className="space-y-2">
         <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">

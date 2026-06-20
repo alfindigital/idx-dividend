@@ -174,6 +174,26 @@ export const Search = (p: IconProps) => (
   </Svg>
 );
 
+export const SearchX = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="11" cy="11" r="7.5" />
+    <path d="m21 21-4.3-4.3M8.5 8.5l5 5M13.5 8.5l-5 5" />
+  </Svg>
+);
+
+export const Check = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M20 6 9 17l-5-5" />
+  </Svg>
+);
+
+export const Layers = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+    <path d="m3 12 9 5 9-5M3 17l9 5 9-5" />
+  </Svg>
+);
+
 export const BarChart3 = (p: IconProps) => (
   <Svg {...p}>
     <path d="M3 3v18h18M18 17V9M13 17V5M8 17v-3" />

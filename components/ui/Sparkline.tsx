@@ -4,14 +4,40 @@ export function Sparkline({
   width = 60,
   height = 18,
   className = "",
+  showEmpty = false,
 }: {
   data: number[];
   width?: number;
   height?: number;
   className?: string;
+  /** Tampilkan garis putus samar saat data < 2 titik (alih-alih kosong). */
+  showEmpty?: boolean;
 }) {
   const pts = data.filter((v) => typeof v === "number" && !Number.isNaN(v));
-  if (pts.length < 2) return null;
+  if (pts.length < 2) {
+    if (!showEmpty) return null;
+    return (
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        className={`text-faint ${className}`}
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <line
+          x1={0}
+          y1={height / 2}
+          x2={width}
+          y2={height / 2}
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeDasharray="2 3"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
 
   const max = Math.max(...pts);
   const min = Math.min(...pts);

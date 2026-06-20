@@ -7,6 +7,7 @@ import HeaderNav from "@/components/HeaderNav";
 import BottomNav from "@/components/BottomNav";
 import SiteFooter from "@/components/SiteFooter";
 import TopProgress from "@/components/TopProgress";
+import ToastViewport from "@/components/ui/Toast";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -130,9 +131,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </div>
         </header>
-        <main className="mx-auto max-w-[1600px] px-4 py-6">{children}</main>
+        <main className="mx-auto max-w-[1600px] px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+5rem)] sm:pb-6">
+          {children}
+        </main>
         <SiteFooter />
         <BottomNav />
+        <ToastViewport />
       </body>
     </html>
   );
