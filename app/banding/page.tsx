@@ -19,8 +19,9 @@ import { ArrowLeft } from "@/components/ui/icons";
 export const revalidate = 43200;
 
 export const metadata: Metadata = {
-  title: "Bandingkan Emiten · Dividen IDX",
+  title: "Bandingkan Emiten",
   description: "Bandingkan yield, konsistensi, tren, dan riwayat dividen beberapa emiten IDX.",
+  alternates: { canonical: "/banding" },
 };
 
 export default function Page() {

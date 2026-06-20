@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import CalendarView, { CalEvent } from "@/components/CalendarView";
 import { emitenList, dividendList, getDividends } from "@/lib/data";
@@ -5,6 +6,19 @@ import { predictNext, eventDate } from "@/lib/derive";
 import { ArrowLeft, Download } from "@/components/ui/icons";
 
 export const revalidate = 43200;
+
+export const metadata: Metadata = {
+  title: "Kalender Dividen",
+  description:
+    "Kalender ex-dividend saham IDX: tanggal historis dan perkiraan jadwal dividen berikutnya. Unduh ke kalendermu (.ics).",
+  alternates: { canonical: "/kalender" },
+  openGraph: {
+    type: "website",
+    url: "/kalender",
+    title: "Kalender Dividen · Dividen IDX",
+    description: "Tanggal ex-dividend historis & perkiraan jadwal dividen berikutnya untuk emiten IDX.",
+  },
+};
 
 export default function Page() {
   const today = new Date();
