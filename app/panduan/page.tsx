@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import DashboardGuide from "@/components/DashboardGuide";
-import { ArrowLeft, AlertTriangle } from "@/components/ui/icons";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { Card } from "@/components/ui/Card";
+import { AlertTriangle } from "@/components/ui/icons";
 
 export const metadata: Metadata = {
   title: "Panduan & Informasi",
@@ -9,14 +11,47 @@ export const metadata: Metadata = {
   alternates: { canonical: "/panduan" },
 };
 
+const FAQ: { q: string; a: string }[] = [
+  {
+    q: "Apa itu yield berjalan?",
+    a: "Yield berjalan (TTM) adalah total dividen 12 bulan terakhir dibagi harga saham terkini, sehingga nilainya berubah mengikuti harga pasar.",
+  },
+  {
+    q: "Apakah perkiraan tanggalnya pasti?",
+    a: "Tidak. Perkiraan tanggal ex-date dihitung dari pola historis dan bukan kepastian. Jumlah dividen tidak diprediksi, jadi selalu pantau pengumuman resmi.",
+  },
+  {
+    q: "Dari mana sumber datanya?",
+    a: "Data dirangkum dari sumber publik seperti IDX, KSEI, situs hubungan investor perusahaan, dan media keuangan. Verifikasi ke sumber resmi sebelum mengambil keputusan.",
+  },
+  {
+    q: "Apa beda cum date dan ex date?",
+    a: "Cum date adalah hari terakhir membeli saham agar masih berhak dividen. Ex date adalah hari pertama saham diperdagangkan tanpa hak dividen, biasanya satu hari bursa setelahnya.",
+  },
+  {
+    q: "Apakah ini saran investasi?",
+    a: "Bukan. Seluruh data dan analitik di situs ini hanya untuk informasi dan edukasi.",
+  },
+];
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+
 export default function Page() {
   return (
     <div className="mx-auto max-w-3xl space-y-5">
-      <div>
-        <Link href="/" className="inline-flex items-center gap-1 text-sm text-brand hover:underline">
-          <ArrowLeft size={15} /> Kembali ke daftar
-        </Link>
-      </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <Breadcrumbs items={[{ label: "Beranda", href: "/" }, { label: "Panduan" }]} />
 
       <header className="space-y-2">
         <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-muted">
@@ -33,6 +68,49 @@ export default function Page() {
       </header>
 
       <DashboardGuide open />
+
+      {/* FAQ */}
+      <section className="space-y-2">
+        <h2 className="font-display text-lg font-semibold text-fg">Pertanyaan umum</h2>
+        <Card className="divide-y divide-line p-0">
+          {FAQ.map((f) => (
+            <details key={f.q} className="group px-4 py-3">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-semibold text-fg">
+                {f.q}
+                <span className="text-faint transition group-open:rotate-180" aria-hidden="true">
+                  &#9662;
+                </span>
+              </summary>
+              <p className="mt-2 text-sm text-muted">{f.a}</p>
+            </details>
+          ))}
+        </Card>
+      </section>
+
+      {/* jelajah lebih lanjut */}
+      <section className="space-y-2">
+        <h2 className="font-display text-lg font-semibold text-fg">Jelajah lebih lanjut</h2>
+        <div className="flex flex-wrap gap-2 text-sm">
+          <Link
+            href="/sektor"
+            className="rounded-lg border border-line bg-surface px-3 py-1.5 text-muted transition hover:border-brand/40 hover:text-fg"
+          >
+            Sektor saham
+          </Link>
+          <Link
+            href="/leaderboard"
+            className="rounded-lg border border-line bg-surface px-3 py-1.5 text-muted transition hover:border-brand/40 hover:text-fg"
+          >
+            Leaderboard
+          </Link>
+          <Link
+            href="/istilah"
+            className="rounded-lg border border-line bg-surface px-3 py-1.5 text-muted transition hover:border-brand/40 hover:text-fg"
+          >
+            Istilah &amp; glosarium
+          </Link>
+        </div>
+      </section>
 
       {/* satu blok disclaimer yang di-highlight */}
       <div className="flex gap-2.5 rounded-xl border border-amber-300/50 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-400/25 dark:bg-amber-400/10 dark:text-amber-200/90">

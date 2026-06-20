@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import CalendarView, { CalEvent } from "@/components/CalendarView";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { emitenList, dividendList, getDividends } from "@/lib/data";
 import { predictNext, eventDate } from "@/lib/derive";
-import { ArrowLeft, Download } from "@/components/ui/icons";
+import { Download } from "@/components/ui/icons";
 
 export const revalidate = 43200;
 
@@ -44,12 +44,7 @@ export default function Page() {
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       <div className="flex items-center justify-between gap-3">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
-        >
-          <ArrowLeft size={15} /> Kembali ke daftar
-        </Link>
+        <Breadcrumbs items={[{ label: "Beranda", href: "/" }, { label: "Kalender" }]} />
         <a
           href="/api/ics"
           className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-brand/5"

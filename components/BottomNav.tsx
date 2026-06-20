@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarDays, Columns } from "./ui/icons";
+import { Home, CalendarDays, Layers, Trophy, Columns } from "./ui/icons";
 
 const items = [
   { href: "/", label: "Beranda", Icon: Home },
+  { href: "/sektor", label: "Sektor", Icon: Layers },
+  { href: "/leaderboard", label: "Peringkat", Icon: Trophy },
   { href: "/kalender", label: "Kalender", Icon: CalendarDays },
   { href: "/banding", label: "Banding", Icon: Columns },
 ];
@@ -14,7 +16,10 @@ const items = [
 export default function BottomNav() {
   const path = usePathname();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/85 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-bg/70 sm:hidden">
+    <nav
+      aria-label="Navigasi utama"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-bg/85 pb-[env(safe-area-inset-bottom)] backdrop-blur supports-[backdrop-filter]:bg-bg/70 sm:hidden"
+    >
       <div className="mx-auto flex max-w-6xl">
         {items.map(({ href, label, Icon }) => {
           const active =
@@ -29,7 +34,7 @@ export default function BottomNav() {
               }`}
             >
               <Icon size={21} />
-              <span>{label}</span>
+              <span className="whitespace-nowrap">{label}</span>
             </Link>
           );
         })}

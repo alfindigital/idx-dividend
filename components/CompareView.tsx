@@ -2,19 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Legend,
-} from "recharts";
+import dynamic from "next/dynamic";
 import { ConsistencyBadge, TrendBadge } from "./Badges";
-import { Search, X, ArrowUpRight } from "./ui/icons";
+import { Search, X, ArrowUpRight, Layers } from "./ui/icons";
+import { Skeleton } from "./ui/Skeleton";
+import EmptyState from "./ui/EmptyState";
 import { formatPersen, formatRupiah } from "@/lib/format";
+
+// Lazy-load grafik (recharts) agar tidak masuk bundel awal halaman banding.
+const CompareChart = dynamic(() => import("./CompareChart"), {
+  ssr: false,
+  loading: () => <Skeleton className="block h-72 w-full rounded-xl" />,
+});
 
 export interface CompareEmiten {
   ticker: string;
@@ -40,6 +39,7 @@ export default function CompareView({ all }: { all: CompareEmiten[] }) {
   const byTicker = useMemo(() => Object.fromEntries(all.map((e) => [e.ticker, e])), [all]);
   const [selected, setSelected] = useState<string[]>([]);
   const [prices, setPrices] = useState<Record<string, number | null>>({});
+  const [priceLoading, setPriceLoading] = useState(false);
   const [q, setQ] = useState("");
 
   useEffect(() => {
@@ -69,6 +69,9 @@ export default function CompareView({ all }: { all: CompareEmiten[] }) {
 
   useEffect(() => {
     if (!selected.length) return;
+    // hanya tampilkan skeleton bila ada emiten terpilih yang harganya belum dimuat
+    const needFetch = selected.some((t) => !(t in prices));
+    if (needFetch) setPriceLoading(true);
     let alive = true;
     fetch(`/api/price?tickers=${selected.join(",")}`)
       .then((r) => r.json())
@@ -78,10 +81,14 @@ export default function CompareView({ all }: { all: CompareEmiten[] }) {
         for (const p of d.prices ?? []) m[p.ticker] = p.price;
         setPrices((prev) => ({ ...prev, ...m }));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => {
+        if (alive) setPriceLoading(false);
+      });
     return () => {
       alive = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected]);
 
   const chosen = selected.map((t) => byTicker[t]).filter(Boolean) as CompareEmiten[];
@@ -111,6 +118,7 @@ export default function CompareView({ all }: { all: CompareEmiten[] }) {
     {
       label: "Yield berjalan",
       render: (e) => {
+        if (priceLoading && !(e.ticker in prices)) return <Skeleton className="h-4 w-12" />;
         const y = runningYield(e);
         return y != null ? (
           <span className="font-semibold tabular text-fg">{formatPersen(y)}</span>
@@ -210,13 +218,55 @@ export default function CompareView({ all }: { all: CompareEmiten[] }) {
       </div>
 
       {chosen.length === 0 ? (
-        <div className="rounded-xl border border-line bg-surface p-8 text-center text-sm text-muted shadow-card">
-          Pilih 2-4 emiten di atas untuk membandingkan yield, konsistensi, tren, dan riwayat DPS.
-        </div>
+        <EmptyState
+          icon={<Layers size={22} />}
+          title="Belum ada emiten dipilih"
+          description="Pilih 2-4 emiten di atas untuk membandingkan yield, konsistensi, tren, dan riwayat DPS berdampingan."
+        />
       ) : (
         <>
-          {/* tabel banding */}
-          <div className="overflow-x-auto rounded-xl border border-line bg-surface shadow-card">
+          {/* kartu banding — layar < sm (tabel sempit di hp) */}
+          <div className="grid gap-2.5 sm:hidden">
+            {chosen.map((e, i) => (
+              <div
+                key={e.ticker}
+                className="overflow-hidden rounded-xl border border-line bg-surface shadow-card"
+              >
+                <div
+                  className="flex items-center justify-between gap-2 border-l-4 px-3 py-2"
+                  style={{ borderColor: COLORS[i] }}
+                >
+                  <Link
+                    href={`/emiten/${e.ticker}`}
+                    className="inline-flex items-center gap-1 font-display font-bold hover:underline"
+                    style={{ color: COLORS[i] }}
+                  >
+                    {e.ticker}
+                    <ArrowUpRight size={13} />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => remove(e.ticker)}
+                    aria-label={`Hapus ${e.ticker}`}
+                    className="text-faint transition hover:text-rose-500"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-2.5 px-3 py-3 text-sm">
+                  {rows.map((row) => (
+                    <div key={row.label} className="min-w-0">
+                      <dt className="text-[11px] uppercase tracking-wide text-faint">{row.label}</dt>
+                      <dd className="mt-0.5">{row.render(e)}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+            ))}
+          </div>
+
+          {/* tabel banding — layar >= sm */}
+          <div className="hidden overflow-x-auto rounded-xl border border-line bg-surface shadow-card sm:block">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-line bg-surface-2">
@@ -264,50 +314,7 @@ export default function CompareView({ all }: { all: CompareEmiten[] }) {
                 Riwayat DPS per tahun (Rp)
               </h2>
               <div className="rounded-xl border border-line bg-surface p-4 shadow-card">
-                <div className="h-72 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--chart-grid)" vertical={false} />
-                      <XAxis
-                        dataKey="tahun"
-                        tick={{ fontSize: 12, fill: "var(--chart-axis)" }}
-                        tickLine={{ stroke: "var(--chart-grid)" }}
-                        axisLine={{ stroke: "var(--chart-grid)" }}
-                      />
-                      <YAxis
-                        tick={{ fontSize: 12, fill: "var(--chart-axis)" }}
-                        tickLine={{ stroke: "var(--chart-grid)" }}
-                        axisLine={{ stroke: "var(--chart-grid)" }}
-                        width={46}
-                        tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          background: "rgb(var(--surface))",
-                          border: "1px solid rgb(var(--border))",
-                          borderRadius: 12,
-                          color: "rgb(var(--fg))",
-                          fontSize: 12,
-                        }}
-                        labelStyle={{ color: "rgb(var(--muted))" }}
-                        formatter={(val: number) => "Rp " + val.toLocaleString("id-ID")}
-                        labelFormatter={(l) => `Tahun ${l}`}
-                      />
-                      <Legend wrapperStyle={{ fontSize: 12 }} />
-                      {chosen.map((e, i) => (
-                        <Line
-                          key={e.ticker}
-                          type="monotone"
-                          dataKey={e.ticker}
-                          stroke={COLORS[i]}
-                          strokeWidth={2}
-                          dot={{ r: 2 }}
-                          connectNulls
-                        />
-                      ))}
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+                <CompareChart chartData={chartData} series={chosen} colors={COLORS} />
               </div>
             </div>
           )}

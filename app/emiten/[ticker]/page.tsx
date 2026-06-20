@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getEmiten, getDividends, allTickers } from "@/lib/data";
+import { getEmiten, getDividends, allTickers, emitenList } from "@/lib/data";
 import {
   annualTotals,
   timingConsistency,
@@ -21,16 +21,14 @@ import ChartSwitcher from "@/components/ChartSwitcher";
 import DividendTimeline from "@/components/DividendTimeline";
 import LiveYield from "@/components/LiveYield";
 import WatchlistButton from "@/components/WatchlistButton";
+import DetailExportButtons from "@/components/DetailExportButtons";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
 import { Card, CardLabel } from "@/components/ui/Card";
-import {
-  ArrowLeft,
-  Download,
-  CalendarPlus,
-  CalendarDays,
-  BarChart3,
-} from "@/components/ui/icons";
+import { CalendarDays, BarChart3, ArrowUpRight } from "@/components/ui/icons";
 import { gcalUrl } from "@/lib/ics";
+import { sektorSlug } from "@/lib/slug";
+import { SITE_URL } from "@/lib/site";
 import { BULAN_ID, labelTipe, formatRupiah, formatPersen, formatTanggal } from "@/lib/format";
 
 export const revalidate = 43200;
@@ -47,7 +45,7 @@ export function generateMetadata({ params }: { params: { ticker: string } }): Me
   const totals = annualTotals(divs);
   const la = totals.length ? totals[totals.length - 1] : null;
   const lastYield = sortByDateDesc(divs).find((d) => d.yield_pct != null)?.yield_pct ?? null;
-  const title = `${e.ticker} — ${e.nama}`;
+  const title = `${e.ticker} - ${e.nama}`;
   const divTxt = la ? ` Dividen terakhir ${formatRupiah(la.total)}/lembar (${la.tahun}).` : "";
   const yieldTxt =
     lastYield != null
@@ -125,6 +123,14 @@ export default function Page({ params }: { params: { ticker: string } }) {
   const streak = payingStreak(divs);
   const favMonth = favoriteExMonth(divs);
 
+  // tampilkan kotak perkiraan (amber) hanya bila ada isinya
+  const showPredBox = emiten.flags.dormant || preds.length > 0;
+
+  // emiten serupa di sektor yang sama (untuk navigasi cepat)
+  const similar = emitenList
+    .filter((e) => e.sektor === emiten.sektor && e.ticker !== emiten.ticker)
+    .slice(0, 4);
+
   // Event terdekat untuk tombol "Tambah ke Google Calendar":
   // utamakan event terumumkan yang belum lewat, jika tak ada pakai perkiraan terdekat.
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -153,16 +159,55 @@ export default function Page({ params }: { params: { ticker: string } }) {
     };
   }
 
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Beranda", item: `${SITE_URL}/` },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: emiten.sektor,
+          item: `${SITE_URL}/sektor/${sektorSlug(emiten.sektor)}`,
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: emiten.ticker,
+          item: `${SITE_URL}/emiten/${emiten.ticker}`,
+        },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      name: `Riwayat dividen ${emiten.ticker} (${emiten.nama})`,
+      description: `Riwayat dividen ~5 tahun, yield, konsistensi, dan perkiraan jadwal dividen ${emiten.ticker} di IDX.`,
+      url: `${SITE_URL}/emiten/${emiten.ticker}`,
+      inLanguage: "id-ID",
+      keywords: ["dividen", emiten.ticker, emiten.nama, emiten.sektor, "yield", "jadwal dividen"],
+      ...(totals.length
+        ? { temporalCoverage: `${totals[0].tahun}/${totals[totals.length - 1].tahun}` }
+        : {}),
+      creator: { "@type": "Organization", name: "alfindigital", url: "https://alfindigital.com" },
+      publisher: { "@type": "Organization", name: "alfindigital", url: "https://alfindigital.com" },
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <div>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1 text-sm text-brand hover:underline"
-        >
-          <ArrowLeft size={15} /> Kembali ke daftar
-        </Link>
-      </div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Breadcrumbs
+        items={[
+          { label: "Beranda", href: "/" },
+          { label: emiten.sektor, href: `/sektor/${sektorSlug(emiten.sektor)}` },
+          { label: emiten.ticker },
+        ]}
+      />
 
       <header className="space-y-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -230,69 +275,59 @@ export default function Page({ params }: { params: { ticker: string } }) {
 
       {/* prediksi + ekspor berdampingan */}
       <section className="grid gap-3 lg:grid-cols-2">
-      <div className="rounded-xl border border-amber-300/50 bg-amber-50 p-3.5 dark:border-amber-400/25 dark:bg-amber-400/10">
-        <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
-          Perkiraan jadwal berikutnya
-        </h2>
-        {emiten.flags.dormant ? (
-          <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/90">
-            Emiten ini tidak membagikan dividen secara teratur belakangan ini (potensi rapel).
-            Tidak ada prediksi tanggal, pantau pengumuman resmi.
-          </p>
-        ) : preds.length === 0 ? (
-          <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/90">
-            Data belum cukup untuk membuat perkiraan.
-          </p>
+        {showPredBox ? (
+          <div className="rounded-xl border border-amber-300/50 bg-amber-50 p-3.5 dark:border-amber-400/25 dark:bg-amber-400/10">
+            <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+              Perkiraan jadwal berikutnya
+            </h2>
+            {emiten.flags.dormant ? (
+              <p className="mt-1 text-sm text-amber-800 dark:text-amber-200/90">
+                Emiten ini tidak membagikan dividen secara teratur belakangan ini (potensi rapel).
+                Tidak ada prediksi tanggal, pantau pengumuman resmi.
+              </p>
+            ) : (
+              <ul className="mt-1 space-y-1 text-sm text-amber-900 dark:text-amber-200/90">
+                {preds.map((p, i) => {
+                  const d = new Date(p.perkiraan);
+                  return (
+                    <li key={i}>
+                      <strong className="capitalize">{p.tipe}</strong>: perkiraan ex-date sekitar{" "}
+                      <strong>
+                        {BULAN_ID[d.getMonth()]} {d.getFullYear()}
+                      </strong>{" "}
+                      <span className="text-amber-600 dark:text-amber-300/80">
+                        (keyakinan {p.confidence})
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <p className="mt-2 text-xs text-amber-600 dark:text-amber-300/70">
+              Perkiraan pola historis; jumlah tidak diprediksi. Bukan saran investasi.
+            </p>
+          </div>
         ) : (
-          <ul className="mt-1 space-y-1 text-sm text-amber-900 dark:text-amber-200/90">
-            {preds.map((p, i) => {
-              const d = new Date(p.perkiraan);
-              return (
-                <li key={i}>
-                  <strong className="capitalize">{p.tipe}</strong>: perkiraan ex-date sekitar{" "}
-                  <strong>
-                    {BULAN_ID[d.getMonth()]} {d.getFullYear()}
-                  </strong>{" "}
-                  <span className="text-amber-600 dark:text-amber-300/80">
-                    (keyakinan {p.confidence})
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+          <Card className="flex items-center p-3.5">
+            <p className="text-xs text-muted">
+              Belum ada perkiraan jadwal · data historis belum cukup untuk emiten ini.
+            </p>
+          </Card>
         )}
-        <p className="mt-2 text-xs text-amber-600 dark:text-amber-300/70">
-          Perkiraan pola historis; jumlah tidak diprediksi. Bukan saran investasi.
-        </p>
-      </div>
 
-      {/* ekspor kalender */}
-      <Card className="p-3.5">
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-fg">
-          <CalendarDays size={16} className="text-brand" /> Ekspor ke kalender
-        </h2>
-        <p className="mt-1 text-xs text-muted">
-          Tambah jadwal + pengingat 1 hari sebelum ex-date ke kalendermu.
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {nextCal && (
-            <a
-              href={gcalUrl(nextCal)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold text-white shadow-glow transition hover:bg-indigo-500"
-            >
-              <CalendarPlus size={15} /> Tambah ke Google Calendar
-            </a>
-          )}
-          <a
-            href={`/api/ics?ticker=${emiten.ticker}`}
-            className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface px-3 py-1.5 text-sm font-medium text-fg transition hover:border-brand/40 hover:bg-surface-2"
-          >
-            <Download size={15} /> Unduh .ics
-          </a>
-        </div>
-      </Card>
+        {/* ekspor kalender */}
+        <Card className="p-3.5">
+          <h2 className="flex items-center gap-1.5 text-sm font-semibold text-fg">
+            <CalendarDays size={16} className="text-brand" /> Ekspor ke kalender
+          </h2>
+          <p className="mt-1 text-xs text-muted">
+            Tambah jadwal + pengingat 1 hari sebelum ex-date ke kalendermu.
+          </p>
+          <DetailExportButtons
+            ticker={emiten.ticker}
+            gcalHref={nextCal ? gcalUrl(nextCal) : null}
+          />
+        </Card>
       </section>
 
       {/* grafik */}
@@ -310,6 +345,32 @@ export default function Page({ params }: { params: { ticker: string } }) {
         <h2 className="mb-2 font-display text-lg font-semibold text-fg">Riwayat lengkap</h2>
         <DividendTimeline events={divs} />
       </section>
+
+      {/* emiten serupa */}
+      {similar.length >= 2 && (
+        <section>
+          <h2 className="mb-2 font-display text-lg font-semibold text-fg">Emiten serupa</h2>
+          <p className="mb-3 text-sm text-muted">Emiten lain di sektor {emiten.sektor}.</p>
+          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+            {similar.map((e) => (
+              <Link
+                key={e.ticker}
+                href={`/emiten/${e.ticker}`}
+                className="group rounded-xl border border-line bg-surface p-3 shadow-card transition hover:border-brand/40 active:bg-surface-2"
+              >
+                <div className="flex items-center gap-1">
+                  <span className="font-display font-bold text-brand-strong">{e.ticker}</span>
+                  <ArrowUpRight
+                    size={13}
+                    className="text-brand opacity-0 transition group-hover:opacity-100"
+                  />
+                </div>
+                <div className="mt-0.5 truncate text-xs text-muted">{e.nama}</div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

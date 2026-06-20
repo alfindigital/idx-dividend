@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { emitenList, getDividends } from "@/lib/data";
 import {
   annualTotals,
@@ -14,7 +13,7 @@ import {
   sortByDateDesc,
 } from "@/lib/derive";
 import CompareView, { CompareEmiten } from "@/components/CompareView";
-import { ArrowLeft } from "@/components/ui/icons";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 export const revalidate = 43200;
 
@@ -50,11 +49,7 @@ export default function Page() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <Link href="/" className="inline-flex items-center gap-1 text-sm text-brand hover:underline">
-          <ArrowLeft size={15} /> Kembali ke daftar
-        </Link>
-      </div>
+      <Breadcrumbs items={[{ label: "Beranda", href: "/" }, { label: "Bandingkan" }]} />
       <header className="space-y-1">
         <h1 className="font-display text-2xl font-bold tracking-tight text-fg">Bandingkan emiten</h1>
         <p className="max-w-2xl text-sm text-muted">

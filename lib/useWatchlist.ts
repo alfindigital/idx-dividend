@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "./toast";
 
 const KEY = "idx-watchlist-v1";
 const EVT = "idx-watchlist-change";
@@ -35,7 +36,8 @@ export function useWatchlist() {
 
   const toggle = useCallback((ticker: string) => {
     const cur = read();
-    const next = cur.includes(ticker) ? cur.filter((t) => t !== ticker) : [...cur, ticker];
+    const added = !cur.includes(ticker);
+    const next = added ? [...cur, ticker] : cur.filter((t) => t !== ticker);
     try {
       localStorage.setItem(KEY, JSON.stringify(next));
     } catch {
@@ -43,6 +45,10 @@ export function useWatchlist() {
     }
     setList(next);
     window.dispatchEvent(new Event(EVT));
+    toast(
+      added ? `${ticker} ditambahkan ke watchlist.` : `${ticker} dihapus dari watchlist.`,
+      { tone: "info" },
+    );
   }, []);
 
   const has = useCallback((t: string) => list.includes(t), [list]);
