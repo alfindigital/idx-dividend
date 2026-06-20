@@ -4,8 +4,9 @@ import DashboardGuide from "@/components/DashboardGuide";
 import { ArrowLeft, AlertTriangle } from "@/components/ui/icons";
 
 export const metadata: Metadata = {
-  title: "Panduan & Informasi · Dividen IDX",
+  title: "Panduan & Informasi",
   description: "Cara membaca data dividen, istilah penting, sumber, dan disclaimer.",
+  alternates: { canonical: "/panduan" },
 };
 
 export default function Page() {

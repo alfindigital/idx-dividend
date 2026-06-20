@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getEmiten, getDividends, allTickers } from "@/lib/data";
@@ -37,6 +38,30 @@ export const dynamicParams = false;
 
 export function generateStaticParams() {
   return allTickers().map((ticker) => ({ ticker }));
+}
+
+export function generateMetadata({ params }: { params: { ticker: string } }): Metadata {
+  const e = getEmiten(params.ticker);
+  if (!e) return { title: "Emiten tidak ditemukan" };
+  const divs = getDividends(e.ticker);
+  const totals = annualTotals(divs);
+  const la = totals.length ? totals[totals.length - 1] : null;
+  const lastYield = sortByDateDesc(divs).find((d) => d.yield_pct != null)?.yield_pct ?? null;
+  const title = `${e.ticker} — ${e.nama}`;
+  const divTxt = la ? ` Dividen terakhir ${formatRupiah(la.total)}/lembar (${la.tahun}).` : "";
+  const yieldTxt =
+    lastYield != null
+      ? ` Yield ~${lastYield.toLocaleString("id-ID", { maximumFractionDigits: 1 })}%.`
+      : "";
+  const description = `Riwayat dividen, yield berjalan, konsistensi & perkiraan jadwal dividen ${e.ticker} (${e.nama}).${divTxt}${yieldTxt} Bukan saran investasi.`;
+  const url = `/emiten/${e.ticker}`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { type: "article", url, title: `${title} · Dividen IDX`, description },
+    twitter: { card: "summary_large_image", title: `${title} · Dividen IDX`, description },
+  };
 }
 
 function StatCard({ label, children }: { label: string; children: React.ReactNode }) {

@@ -7,6 +7,7 @@ import HeaderNav from "@/components/HeaderNav";
 import BottomNav from "@/components/BottomNav";
 import SiteFooter from "@/components/SiteFooter";
 import TopProgress from "@/components/TopProgress";
+import { SITE_URL, SITE_NAME } from "@/lib/site";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -21,10 +22,44 @@ const grotesk = Space_Grotesk({
   display: "swap",
 });
 
+const DESC =
+  "Riwayat dividen ~5 tahun, yield berjalan dari harga terkini, skor konsistensi & tren, dan perkiraan jadwal dividen berikutnya untuk emiten IDX berdividen besar.";
+
 export const metadata: Metadata = {
-  title: "Dividen IDX · History & Kalender",
-  description:
-    "Riwayat dividen 5 tahun & perkiraan jadwal dividen berikutnya untuk emiten IDX berdividen besar.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Dividen IDX — History, Yield & Kalender Dividen Saham IDX",
+    template: "%s · Dividen IDX",
+  },
+  description: DESC,
+  applicationName: SITE_NAME,
+  keywords: [
+    "dividen IDX",
+    "jadwal dividen",
+    "kalender dividen",
+    "yield dividen",
+    "cum date",
+    "ex date",
+    "saham dividen Indonesia",
+    "dividen saham",
+    "history dividen",
+  ],
+  authors: [{ name: "alfindigital", url: "https://alfindigital.com" }],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "id_ID",
+    url: SITE_URL,
+    title: "Dividen IDX — History, Yield & Kalender Dividen Saham IDX",
+    description: DESC,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dividen IDX — History, Yield & Kalender Dividen Saham IDX",
+    description: DESC,
+  },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
@@ -62,6 +97,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="id" className={`${jakarta.variable} ${grotesk.variable}`} suppressHydrationWarning>
       <body>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: SITE_NAME,
+              url: SITE_URL,
+              description: DESC,
+              inLanguage: "id-ID",
+              publisher: {
+                "@type": "Organization",
+                name: "alfindigital",
+                url: "https://alfindigital.com",
+              },
+            }),
+          }}
+        />
         <TopProgress />
         <header className="sticky top-0 z-20 border-b border-line bg-bg/70 backdrop-blur supports-[backdrop-filter]:bg-bg/60">
           <div className="mx-auto flex max-w-[1600px] items-center justify-between px-4 py-2.5">
