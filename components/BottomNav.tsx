@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarDays, Columns } from "./ui/icons";
+import { Home, CalendarDays, Layers, Trophy, Columns } from "./ui/icons";
 
 const items = [
   { href: "/", label: "Beranda", Icon: Home },
+  { href: "/sektor", label: "Sektor", Icon: Layers },
+  { href: "/leaderboard", label: "Peringkat", Icon: Trophy },
   { href: "/kalender", label: "Kalender", Icon: CalendarDays },
   { href: "/banding", label: "Banding", Icon: Columns },
 ];
@@ -32,7 +34,7 @@ export default function BottomNav() {
               }`}
             >
               <Icon size={21} />
-              <span>{label}</span>
+              <span className="whitespace-nowrap">{label}</span>
             </Link>
           );
         })}
