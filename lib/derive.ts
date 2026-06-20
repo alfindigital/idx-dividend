@@ -178,3 +178,71 @@ export function runningYield(events: DividendEvent[], price: number | null, asOf
   if (ttm <= 0) return null;
   return (ttm / price) * 100;
 }
+
+// ---------- analitik tambahan ----------
+
+/** CAGR total DPS tahunan dari tahun pertama ke tahun terakhir (persen/tahun). */
+export function dpsCagr(events: DividendEvent[]): number | null {
+  const t = annualTotals(events);
+  if (t.length < 2) return null;
+  const first = t[0];
+  const last = t[t.length - 1];
+  const years = last.tahun - first.tahun;
+  if (years <= 0 || first.total <= 0 || last.total <= 0) return null;
+  return (Math.pow(last.total / first.total, 1 / years) - 1) * 100;
+}
+
+/** Statistik yield tercatat: rata-rata, minimum, maksimum. */
+export function yieldStats(
+  events: DividendEvent[],
+): { avg: number; min: number; max: number; n: number } | null {
+  const ys = events.map((e) => e.yield_pct).filter((y): y is number => typeof y === "number");
+  if (!ys.length) return null;
+  return {
+    avg: ys.reduce((a, b) => a + b, 0) / ys.length,
+    min: Math.min(...ys),
+    max: Math.max(...ys),
+    n: ys.length,
+  };
+}
+
+/** Rata-rata total dividen per tahun. */
+export function avgAnnualTotal(events: DividendEvent[]): number | null {
+  const t = annualTotals(events);
+  if (!t.length) return null;
+  return t.reduce((a, b) => a + b.total, 0) / t.length;
+}
+
+/** Tahun beruntun membagikan dividen, dihitung mundur dari tahun terakhir. */
+export function payingStreak(events: DividendEvent[]): number {
+  const years = new Set(events.filter((e) => e.dps_idr != null).map((e) => e.tahun));
+  if (!years.size) return 0;
+  let y = Math.max(...years);
+  let streak = 0;
+  while (years.has(y)) {
+    streak++;
+    y--;
+  }
+  return streak;
+}
+
+/** Bulan ex-date yang paling sering muncul (final diutamakan). */
+export function favoriteExMonth(events: DividendEvent[]): string | null {
+  const finals = events.filter((e) => e.tipe === "final" && eventDate(e));
+  const pool = finals.length ? finals : events.filter((e) => eventDate(e));
+  if (!pool.length) return null;
+  const counts = new Map<number, number>();
+  for (const e of pool) {
+    const m = new Date(eventDate(e)!).getMonth();
+    counts.set(m, (counts.get(m) ?? 0) + 1);
+  }
+  let best = -1;
+  let bestC = 0;
+  for (const [m, c] of counts) {
+    if (c > bestC) {
+      bestC = c;
+      best = m;
+    }
+  }
+  return best >= 0 ? bulanID(best) : null;
+}

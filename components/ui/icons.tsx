@@ -186,6 +186,19 @@ export const TrendingUp = (p: IconProps) => (
   </Svg>
 );
 
+export const Columns = (p: IconProps) => (
+  <Svg {...p}>
+    <rect width="18" height="18" x="3" y="3" rx="2" />
+    <path d="M12 3v18" />
+  </Svg>
+);
+
+export const X = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M18 6 6 18M6 6l12 12" />
+  </Svg>
+);
+
 export const SlidersHorizontal = (p: IconProps) => (
   <Svg {...p}>
     <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />

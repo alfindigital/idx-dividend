@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarDays } from "./ui/icons";
+import { Home, CalendarDays, Columns } from "./ui/icons";
 
 const items = [
   { href: "/", label: "Beranda", Icon: Home },
   { href: "/kalender", label: "Kalender", Icon: CalendarDays },
+  { href: "/banding", label: "Banding", Icon: Columns },
 ];
 
 /** Navigasi bawah khusus layar kecil (thumb-reach). Disembunyikan di ≥ sm. */
