@@ -117,6 +117,10 @@ export default function CalendarView({
 
   return (
     <div className="rounded-xl border border-line bg-surface p-3 shadow-card sm:p-4">
+      {/* pengumuman periode aktif untuk pembaca layar */}
+      <div aria-live="polite" className="sr-only">
+        {view === "bulan" ? `${BULAN_ID[m]} ${y}` : `Tahun ${y}`}, {monthCount} event
+      </div>
       {/* toggle tampilan */}
       <div
         role="tablist"
@@ -198,7 +202,7 @@ export default function CalendarView({
           <div
             key={h}
             className={`pb-1 text-center text-[11px] font-semibold uppercase tracking-wide ${
-              i === 0 ? "text-rose-400" : "text-faint"
+              i === 0 || i === 6 ? "text-rose-400" : "text-faint"
             }`}
           >
             {h}
@@ -210,7 +214,8 @@ export default function CalendarView({
           const iso = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
           const evs = byDate.get(iso) ?? [];
           const isToday = iso === todayIso;
-          const weekend = i % 7 === 0;
+          const col = i % 7;
+          const weekend = col === 0 || col === 6;
           const isOpen = openDay === iso;
           return (
             <div

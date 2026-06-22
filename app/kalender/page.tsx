@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import CalendarView, { CalEvent } from "@/components/CalendarView";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { emitenList, dividendList, getDividends } from "@/lib/data";
 import { predictNext, eventDate } from "@/lib/derive";
 import { Download } from "@/components/ui/icons";
+import { BULAN_ID } from "@/lib/format";
 
 export const revalidate = 43200;
 
@@ -59,6 +61,16 @@ export default function Page() {
         initialMonth={today.getMonth()}
         todayIso={todayIso}
       />
+
+      <p className="text-sm text-muted">
+        Halaman bulan:{" "}
+        <Link
+          href={`/kalender/${today.getFullYear()}/${String(today.getMonth() + 1).padStart(2, "0")}`}
+          className="font-medium text-brand hover:underline"
+        >
+          Kalender dividen {BULAN_ID[today.getMonth()]} {today.getFullYear()} →
+        </Link>
+      </p>
     </div>
   );
 }
