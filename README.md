@@ -11,10 +11,15 @@ kapan dividen berikutnya kemungkinan dibagikan (tanggal saja — bukan estimasi 
 ## Fitur
 - **Dashboard**: tabel emiten dengan yield berjalan (harga terkini, otomatis), yield terakhir,
   badge konsistensi waktu & tren jumlah, tanggal ex-dividend terakhir, dan perkiraan berikutnya.
-  Bisa difilter (sektor, dorman/rapel, cari) dan diurutkan (yield, terdekat, konsistensi).
-- **Detail per-emiten**: timeline lengkap (tipe, cum/ex date, tanggal bayar, Rp/lembar, yield),
-  grafik dividen/tahun, skor konsistensi & tren, perkiraan jadwal, dan **tautan sumber per event**.
-- **Kalender**: tampilan bulanan event ex-dividend historis + perkiraan tanggal berikutnya.
+  Bisa difilter (sektor, dorman/rapel, cari) dan diurutkan; **preset cepat** + feed **"Akan ex-dividend"**
+  (menonjolkan cum-date / "beli sebelum").
+- **Detail per-emiten**: ringkasan naratif + **FAQ**, timeline lengkap (tipe, cum/ex date, tanggal bayar,
+  Rp/lembar, yield, keyakinan), grafik dividen/tahun, **yield forward & toggle setelah pajak 10%**,
+  skor konsistensi & tren, perkiraan jadwal, **tautan sumber per event**, dan tombol **bagikan/bandingkan**.
+- **Kalender**: tampilan bulanan + heatmap tahunan; **halaman kalender per bulan** (`/kalender/2026/06`).
+- **Lainnya**: `/leaderboard`, `/sektor`, `/banding` (compare), **`/artikel`** (edukasi), **⌘K** cari cepat,
+  **PWA** (installable), **`/api/dividends`** ekspor dataset, watchlist yang bisa dibagikan via URL.
+- **Transparansi**: badge **"Data diperbarui …"** + ringkasan kualitas sumber per emiten.
 
 ## Cakupan data (50 emiten)
 50 emiten high-dividend lintas sektor (perbankan, batu bara/energi, logam, telko/menara, konsumer,
@@ -55,5 +60,7 @@ data/                # emiten.json, dividends.json  ← sumber kebenaran data ri
 
 ## Memperbarui data
 Edit `data/emiten.json` & `data/dividends.json` lalu commit — Vercel akan men-deploy ulang.
+**Setelah memperbarui data, bump `DATA_UPDATED` di `lib/dataMeta.ts`** (tanggal kurasi yang tampil
+sebagai badge "Data diperbarui"), lalu jalankan `npm run check-data` dan `npm test`.
 Skema satu event: `{ ticker, tahun, tipe(final|interim|special), cum_date, ex_date, record_date,
 payment_date, dps_idr, harga_ref, yield_pct, confidence, notes, sumber_url[] }`.
