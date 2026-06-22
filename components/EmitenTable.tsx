@@ -45,6 +45,12 @@ export interface DashboardRow {
   dpsSeries: number[];
 }
 
+export interface EnrichedRow extends DashboardRow {
+  price: number | null;
+  displayYield: number | null;
+  yieldFromLive: boolean;
+}
+
 type SortKey = "ticker" | "sektor" | "yield" | "div" | "lastEx" | "next" | "yearsPaid";
 type Dir = "asc" | "desc";
 
@@ -682,6 +688,25 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
             >
               Reset semua
             </button>
+            {onlyWatchlist && watchlist.list.length > 0 && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const url = watchlist.shareUrl();
+                  if (!url) return;
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    toast("Tautan watchlist disalin.", { tone: "success" });
+                    track("share_emiten", { method: "watchlist" });
+                  } catch {
+                    toast("Gagal menyalin tautan.", { tone: "warn" });
+                  }
+                }}
+                className="rounded-full border border-line px-2 py-0.5 text-xs font-medium text-muted transition hover:border-brand/40 hover:text-fg"
+              >
+                Bagikan watchlist
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -824,7 +849,7 @@ function MobileCard({
   fav,
   onToggleFav,
 }: {
-  r: any;
+  r: EnrichedRow;
   loading: boolean;
   fav: boolean;
   onToggleFav: () => void;
