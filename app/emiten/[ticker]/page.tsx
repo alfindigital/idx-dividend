@@ -22,13 +22,16 @@ import DividendTimeline from "@/components/DividendTimeline";
 import LiveYield from "@/components/LiveYield";
 import WatchlistButton from "@/components/WatchlistButton";
 import DetailExportButtons from "@/components/DetailExportButtons";
+import ShareButtons from "@/components/ShareButtons";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { ConsistencyBadge, TrendBadge, FlagBadge } from "@/components/Badges";
 import { Card, CardLabel } from "@/components/ui/Card";
-import { CalendarDays, BarChart3, ArrowUpRight } from "@/components/ui/icons";
+import { CalendarDays, BarChart3, ArrowUpRight, Columns } from "@/components/ui/icons";
 import { gcalUrl } from "@/lib/ics";
 import { sektorSlug } from "@/lib/slug";
 import { SITE_URL } from "@/lib/site";
+import { emitenNarrative, emitenFaq } from "@/lib/emitenContent";
+import { relativeLabel } from "@/lib/date";
 import { BULAN_ID, labelTipe, formatRupiah, formatPersen, formatTanggal } from "@/lib/format";
 
 export const revalidate = 43200;
@@ -123,6 +126,14 @@ export default function Page({ params }: { params: { ticker: string } }) {
   const streak = payingStreak(divs);
   const favMonth = favoriteExMonth(divs);
 
+  // konten naratif + FAQ (SEO & konteks) + ringkasan kualitas data
+  const la = totals.length ? totals[totals.length - 1] : null;
+  const narrative = emitenNarrative(emiten, divs);
+  const faq = emitenFaq(emiten, divs);
+  const verifiedCount = divs.filter(
+    (d) => Array.isArray(d.sumber_url) && d.sumber_url.length >= 2,
+  ).length;
+
   // tampilkan kotak perkiraan (amber) hanya bila ada isinya
   const showPredBox = emiten.flags.dormant || preds.length > 0;
 
@@ -193,6 +204,15 @@ export default function Page({ params }: { params: { ticker: string } }) {
       creator: { "@type": "Organization", name: "alfindigital", url: "https://alfindigital.com" },
       publisher: { "@type": "Organization", name: "alfindigital", url: "https://alfindigital.com" },
     },
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faq.map((qa) => ({
+        "@type": "Question",
+        name: qa.q,
+        acceptedAnswer: { "@type": "Answer", text: qa.a },
+      })),
+    },
   ];
 
   return (
@@ -220,18 +240,54 @@ export default function Page({ params }: { params: { ticker: string } }) {
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <span className="rounded bg-surface-2 px-2 py-0.5 text-muted">{emiten.sektor}</span>
+          <Link
+            href={`/sektor/${sektorSlug(emiten.sektor)}`}
+            className="rounded bg-surface-2 px-2 py-0.5 text-muted transition hover:text-fg"
+          >
+            {emiten.sektor}
+          </Link>
           <FlagBadge dormant={emiten.flags.dormant} special={emiten.flags.special_history} />
+          {verifiedCount > 0 && (
+            <span
+              className="rounded bg-emerald-500/10 px-2 py-0.5 text-emerald-700 dark:text-emerald-300"
+              title="Jumlah event dengan minimal 2 sumber tercatat (cross-check)."
+            >
+              {verifiedCount}/{divs.length} event ≥2 sumber
+            </span>
+          )}
           {emiten.pola_pembayaran && (
             <span className="text-muted">Pola: {emiten.pola_pembayaran}</span>
           )}
         </div>
+
+        {/* aksi: bagikan + bandingkan */}
+        <div className="flex flex-wrap items-center gap-2">
+          <ShareButtons
+            ticker={emiten.ticker}
+            title={`Dividen ${emiten.ticker} — ${emiten.nama}`}
+            text={`Riwayat, yield & jadwal dividen ${emiten.ticker} (${emiten.nama}) di Dividen IDX.`}
+          />
+          <Link
+            href={`/banding?t=${emiten.ticker}`}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-xs font-medium text-muted transition hover:border-brand/40 hover:text-fg"
+          >
+            <Columns size={14} /> Bandingkan
+          </Link>
+        </div>
+
+        {/* ringkasan naratif (konteks + SEO) */}
+        <p className="max-w-3xl text-sm leading-relaxed text-muted">{narrative}</p>
       </header>
 
       {/* ringkasan */}
       <section className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         <StatCard label="Yield berjalan (TTM)">
-          <LiveYield ticker={emiten.ticker} ttm={ttm} fallbackYield={lastYield} />
+          <LiveYield
+            ticker={emiten.ticker}
+            ttm={ttm}
+            fallbackYield={lastYield}
+            lastAnnualTotal={la?.total ?? null}
+          />
         </StatCard>
         <StatCard label="Konsistensi waktu">
           <ConsistencyBadge value={timing} />
@@ -289,18 +345,26 @@ export default function Page({ params }: { params: { ticker: string } }) {
               <ul className="mt-1 space-y-1 text-sm text-amber-900 dark:text-amber-200/90">
                 {preds.map((p, i) => {
                   const d = new Date(p.perkiraan);
+                  const rel = relativeLabel(p.perkiraan);
                   return (
                     <li key={i}>
                       <strong className="capitalize">{p.tipe}</strong>: perkiraan ex-date sekitar{" "}
                       <strong>
                         {BULAN_ID[d.getMonth()]} {d.getFullYear()}
                       </strong>{" "}
+                      {rel && <span className="text-amber-700 dark:text-amber-300">({rel})</span>}{" "}
                       <span className="text-amber-600 dark:text-amber-300/80">
-                        (keyakinan {p.confidence})
+                        · keyakinan {p.confidence}
                       </span>
                     </li>
                   );
                 })}
+                {la && (
+                  <li className="text-xs text-amber-600 dark:text-amber-300/70">
+                    Referensi: dividen terakhir {formatRupiah(la.total)}/lembar ({la.tahun}). Jumlah
+                    berikutnya tidak diprediksi.
+                  </li>
+                )}
               </ul>
             )}
             <p className="mt-2 text-xs text-amber-600 dark:text-amber-300/70">
@@ -345,6 +409,31 @@ export default function Page({ params }: { params: { ticker: string } }) {
         <h2 className="mb-2 font-display text-lg font-semibold text-fg">Riwayat lengkap</h2>
         <DividendTimeline events={divs} />
       </section>
+
+      {/* FAQ (terlihat + schema FAQPage) */}
+      {faq.length > 0 && (
+        <section>
+          <h2 className="mb-2 font-display text-lg font-semibold text-fg">
+            Pertanyaan umum tentang dividen {emiten.ticker}
+          </h2>
+          <div className="space-y-2">
+            {faq.map((qa, i) => (
+              <details
+                key={i}
+                className="group rounded-xl border border-line bg-surface p-3.5 shadow-card"
+              >
+                <summary className="cursor-pointer list-none font-medium text-fg marker:content-none">
+                  <span className="flex items-center justify-between gap-2">
+                    {qa.q}
+                    <span className="text-faint transition group-open:rotate-180">⌄</span>
+                  </span>
+                </summary>
+                <p className="mt-2 text-sm leading-relaxed text-muted">{qa.a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* emiten serupa */}
       {similar.length >= 2 && (

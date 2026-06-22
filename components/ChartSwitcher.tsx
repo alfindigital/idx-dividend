@@ -81,7 +81,35 @@ export default function ChartSwitcher({
         </button>
       </div>
       <div role="tabpanel" id="panel-chart" aria-labelledby={tab === "dps" ? "tab-dps" : "tab-yield"}>
-        {tab === "dps" ? <DividendChart data={dps} /> : <DividendYieldChart data={yieldData} />}
+        <figure className="m-0">
+          <figcaption className="sr-only">
+            {tab === "dps"
+              ? "Grafik total dividen per lembar (Rupiah) per tahun."
+              : "Grafik yield dividen (persen) per tahun."}
+          </figcaption>
+          {tab === "dps" ? <DividendChart data={dps} /> : <DividendYieldChart data={yieldData} />}
+          {/* tabel data untuk screen reader & crawler */}
+          <table className="sr-only">
+            <caption>Data {tab === "dps" ? "dividen per lembar (Rp)" : "yield (%)"} per tahun</caption>
+            <thead>
+              <tr>
+                <th scope="col">Tahun</th>
+                <th scope="col">{tab === "dps" ? "DPS (Rp)" : "Yield (%)"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(tab === "dps"
+                ? dps.map((d) => ({ tahun: d.tahun, val: d.total }))
+                : yieldData.map((d) => ({ tahun: d.tahun, val: d.yield }))
+              ).map((row) => (
+                <tr key={row.tahun}>
+                  <td>{row.tahun}</td>
+                  <td>{row.val}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </figure>
       </div>
     </div>
   );

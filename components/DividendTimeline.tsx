@@ -1,7 +1,7 @@
 import type { DividendEvent } from "@/lib/types";
 import { formatTanggal, formatRupiah, formatPersen } from "@/lib/format";
 import { sortByDateDesc } from "@/lib/derive";
-import { TipeBadge } from "./Badges";
+import { TipeBadge, ConfidenceBadge } from "./Badges";
 import { ExternalLink } from "./ui/icons";
 
 function hostname(url: string): string {
@@ -49,6 +49,7 @@ export default function DividendTimeline({ events }: { events: DividendEvent[] }
               <li key={i} className="rounded-xl border border-line bg-surface p-3 shadow-card">
                 <div className="flex flex-wrap items-center gap-2">
                   <TipeBadge tipe={e.tipe} />
+                  {e.confidence && <ConfidenceBadge value={e.confidence} />}
                   <span className="ml-auto text-right">
                     <span className="font-display tabular text-lg font-bold text-brand-strong">
                       {formatRupiah(e.dps_idr)}
@@ -58,8 +59,10 @@ export default function DividendTimeline({ events }: { events: DividendEvent[] }
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-muted sm:grid-cols-4">
                   <div>
-                    <div className="text-[11px] uppercase tracking-wide text-faint">Cum date</div>
-                    {formatTanggal(e.cum_date)}
+                    <div className="text-[11px] uppercase tracking-wide text-faint">
+                      Cum date <span className="normal-case text-amber-600 dark:text-amber-400">· beli sebelum</span>
+                    </div>
+                    <span className="font-medium text-fg">{formatTanggal(e.cum_date)}</span>
                   </div>
                   <div>
                     <div className="text-[11px] uppercase tracking-wide text-faint">Ex date</div>
