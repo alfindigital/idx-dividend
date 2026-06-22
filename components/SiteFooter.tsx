@@ -42,30 +42,37 @@ const SOCIALS = [
 
 /** Footer animasi: copyright + rotasi akun sosial, glow sesuai warna brand. */
 export default function SiteFooter() {
+  const footerRef = useRef<HTMLElement>(null);
   const rotRef = useRef<HTMLDivElement>(null);
   const glowRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    // hormati prefers-reduced-motion: jangan animasikan sama sekali
+    const reduced =
+      typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
     const rot = rotRef.current;
     const items = rot ? Array.from(rot.querySelectorAll<HTMLElement>(".afd-item")) : [];
     let i = 0;
-    let paused = false;
+    let hovered = false;
+    let visible = true; // dijaga oleh IntersectionObserver
 
     const id = window.setInterval(() => {
-      if (paused || items.length === 0) return;
+      if (hovered || !visible || items.length === 0) return;
       items[i].classList.remove("active");
       i = (i + 1) % items.length;
       items[i].classList.add("active");
     }, 2300);
 
-    const onEnter = () => (paused = true);
-    const onLeave = () => (paused = false);
+    const onEnter = () => (hovered = true);
+    const onLeave = () => (hovered = false);
     rot?.addEventListener("mouseenter", onEnter);
     rot?.addEventListener("mouseleave", onLeave);
 
     let to: number;
     const move = () => {
-      if (glowRef.current) {
+      if (visible && glowRef.current) {
         glowRef.current.style.left = Math.random() * 120 - 30 + "%";
         glowRef.current.style.top = Math.random() * 60 - 30 + "%";
       }
@@ -73,18 +80,34 @@ export default function SiteFooter() {
     };
     move();
 
+    // pause saat footer di luar viewport (hemat kerja paint)
+    let io: IntersectionObserver | null = null;
+    if (footerRef.current && typeof IntersectionObserver !== "undefined") {
+      io = new IntersectionObserver(
+        (entries) => {
+          visible = entries[0]?.isIntersecting ?? true;
+        },
+        { rootMargin: "100px" },
+      );
+      io.observe(footerRef.current);
+    }
+
     return () => {
       window.clearInterval(id);
       window.clearTimeout(to);
       rot?.removeEventListener("mouseenter", onEnter);
       rot?.removeEventListener("mouseleave", onLeave);
+      io?.disconnect();
     };
   }, []);
 
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-10 overflow-hidden border-t border-line bg-surface pb-20 sm:pb-0">
+    <footer
+      ref={footerRef}
+      className="relative mt-10 overflow-hidden border-t border-line bg-surface pb-20 sm:pb-0"
+    >
       <span className="afd-glow" ref={glowRef} aria-hidden="true" />
       <nav
         aria-label="Tautan situs"

@@ -78,6 +78,7 @@ export default function YearHeatmap({
                     return (
                       <div
                         key={i}
+                        aria-hidden="true"
                         className={`aspect-square rounded-[3px] ${tone} ${ring}`}
                         title={`${d} ${BULAN_ID[month]} ${year}`}
                       />
@@ -107,7 +108,10 @@ export default function YearHeatmap({
       )}
 
       {/* skala intensitas */}
-      <div className="mt-4 flex items-center justify-end gap-1.5 text-[11px] text-muted">
+      <div
+        className="mt-4 flex items-center justify-end gap-1.5 text-[11px] text-muted"
+        aria-label="Skala intensitas warna: dari sedikit ke banyak event dividen"
+      >
         <span>sedikit</span>
         <span className="inline-block h-3 w-3 rounded-[3px] bg-surface-2" />
         <span className="inline-block h-3 w-3 rounded-[3px] bg-brand/20" />

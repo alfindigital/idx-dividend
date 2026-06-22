@@ -22,6 +22,7 @@ import {
 } from "./ui/icons";
 import { useWatchlist } from "@/lib/useWatchlist";
 import { toast } from "@/lib/toast";
+import { track } from "@/lib/track";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { formatPersen, formatTanggalSingkat, formatRupiah, BULAN_ID_SINGKAT } from "@/lib/format";
 
@@ -42,6 +43,12 @@ export interface DashboardRow {
   nextPredDate: string | null;
   nextPredLabel: string | null;
   dpsSeries: number[];
+}
+
+export interface EnrichedRow extends DashboardRow {
+  price: number | null;
+  displayYield: number | null;
+  yieldFromLive: boolean;
 }
 
 type SortKey = "ticker" | "sektor" | "yield" | "div" | "lastEx" | "next" | "yearsPaid";
@@ -278,6 +285,27 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     );
   }
 
+  // preset cepat satu-klik (entry point untuk pengguna non-power)
+  const PRESETS: { id: string; label: string; sort?: { key: SortKey; dir: Dir }; wl?: boolean }[] = [
+    { id: "yield", label: "Yield tertinggi", sort: { key: "yield", dir: "desc" } },
+    { id: "next", label: "Terdekat bagi dividen", sort: { key: "next", dir: "asc" } },
+    { id: "yearsPaid", label: "Paling konsisten", sort: { key: "yearsPaid", dir: "desc" } },
+    { id: "div", label: "Dividen terbesar", sort: { key: "div", dir: "desc" } },
+    { id: "wl", label: "★ Watchlist", wl: true },
+  ];
+  function applyPreset(p: (typeof PRESETS)[number]) {
+    if (p.wl) {
+      setOnlyWatchlist((v) => !v);
+    } else if (p.sort) {
+      setSort(p.sort);
+    }
+    track("use_preset", { preset: p.id });
+  }
+  function presetActive(p: (typeof PRESETS)[number]) {
+    if (p.wl) return onlyWatchlist;
+    return p.sort ? sort.key === p.sort.key && sort.dir === p.sort.dir : false;
+  }
+
   function onResizeDown(e: React.MouseEvent, idx: number) {
     e.preventDefault();
     e.stopPropagation();
@@ -398,6 +426,7 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
     a.remove();
     URL.revokeObjectURL(url);
     toast(`CSV diunduh (${sorted.length} emiten sesuai filter).`, { tone: "success" });
+    track("export_csv", { count: sorted.length });
   }
 
   function renderCell(col: Col, r: Row) {
@@ -452,7 +481,12 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
           <span className={`font-semibold tabular ${yieldColor(r.displayYield)}`}>
             {formatPersen(r.displayYield)}
             {!r.yieldFromLive && (
-              <span className="ml-1 align-middle text-[10px] font-normal text-faint">tct</span>
+              <abbr
+                title="Yield saat dividen terakhir dibagikan (harga live sedang tak tersedia)"
+                className="ml-1 align-middle rounded bg-surface-2 px-1 text-[9px] font-medium uppercase tracking-wide text-faint no-underline"
+              >
+                terakhir
+              </abbr>
             )}
           </span>
         ) : (
@@ -492,6 +526,28 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
 
   return (
     <div className="space-y-3">
+      {/* preset cepat — satu klik untuk pandangan paling diminati */}
+      <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:flex-wrap sm:px-0">
+        {PRESETS.map((p) => {
+          const active = presetActive(p);
+          return (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => applyPreset(p)}
+              aria-pressed={active}
+              className={`shrink-0 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium transition ${
+                active
+                  ? "border-brand/50 bg-brand/10 text-brand-strong"
+                  : "border-line bg-surface text-muted hover:border-brand/40 hover:text-fg"
+              }`}
+            >
+              {p.label}
+            </button>
+          );
+        })}
+      </div>
+
       {/* kontrol — menempel di bawah header saat di-scroll */}
       <div className="sticky top-12 z-10 -mx-4 border-b border-line/60 bg-bg/85 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-bg/65">
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -632,6 +688,25 @@ export default function EmitenTable({ rows }: { rows: DashboardRow[] }) {
             >
               Reset semua
             </button>
+            {onlyWatchlist && watchlist.list.length > 0 && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const url = watchlist.shareUrl();
+                  if (!url) return;
+                  try {
+                    await navigator.clipboard.writeText(url);
+                    toast("Tautan watchlist disalin.", { tone: "success" });
+                    track("share_emiten", { method: "watchlist" });
+                  } catch {
+                    toast("Gagal menyalin tautan.", { tone: "warn" });
+                  }
+                }}
+                className="rounded-full border border-line px-2 py-0.5 text-xs font-medium text-muted transition hover:border-brand/40 hover:text-fg"
+              >
+                Bagikan watchlist
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -774,7 +849,7 @@ function MobileCard({
   fav,
   onToggleFav,
 }: {
-  r: any;
+  r: EnrichedRow;
   loading: boolean;
   fav: boolean;
   onToggleFav: () => void;

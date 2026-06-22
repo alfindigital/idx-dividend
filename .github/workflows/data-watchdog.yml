@@ -1,0 +1,60 @@
+name: Data watchdog
+
+# Mengingatkan saat data dividen kemungkinan tertinggal (mis. setelah musim RUPS),
+# agar tidak diam-diam basi. Tidak mengubah data — hanya membuka/memperbarui issue.
+
+on:
+  schedule:
+    - cron: "0 1 * * 1" # tiap Senin 01:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  staleness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: check
+        name: Periksa kesegaran data
+        run: node scripts/data-staleness.mjs
+      - name: Buka / perbarui issue bila data basi
+        if: steps.check.outputs.stale == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const report = `${{ steps.check.outputs.report }}`;
+            const title = "🟡 Data dividen kemungkinan perlu diperbarui";
+            const body = [
+              "Watchdog terjadwal mendeteksi data mungkin tertinggal:",
+              "",
+              "```",
+              report,
+              "```",
+              "",
+              "Langkah: cek emiten di atas (RUPS/pengumuman terbaru), tambahkan event ke `data/dividends.json` (ikuti konvensi di `HANDOFF.md`), bump `DATA_UPDATED` di `lib/dataMeta.ts`, lalu jalankan `npm run check-data`.",
+            ].join("\n");
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "open",
+              labels: "data-staleness",
+            });
+            if (existing.data.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.data[0].number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ["data-staleness"],
+              });
+            }

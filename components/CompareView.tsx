@@ -315,6 +315,29 @@ export default function CompareView({ all }: { all: CompareEmiten[] }) {
               </h2>
               <div className="rounded-xl border border-line bg-surface p-4 shadow-card">
                 <CompareChart chartData={chartData} series={chosen} colors={COLORS} />
+                <table className="sr-only">
+                  <caption>Riwayat dividen per lembar (Rp) per tahun untuk emiten terpilih</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Tahun</th>
+                      {chosen.map((e) => (
+                        <th key={e.ticker} scope="col">
+                          {e.ticker}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chartData.map((row) => (
+                      <tr key={row.tahun as number}>
+                        <td>{row.tahun}</td>
+                        {chosen.map((e) => (
+                          <td key={e.ticker}>{row[e.ticker] ?? "-"}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

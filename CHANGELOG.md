@@ -4,6 +4,49 @@ Catatan perubahan untuk **Dividen IDX**. Tanggal format `YYYY-MM-DD`.
 
 ---
 
+## 2026-06-22 — Audit 360°: trust, konversi, SEO, a11y, infra (Tier 0–3)
+
+Implementasi besar lintas-bidang dari hasil audit produk. **Tanpa perubahan skema data.**
+Yang **di-skip sesuai keputusan**: alert email/push (#8), CTA afiliasi broker (#17).
+
+### Trust & data
+- **Badge "Data diperbarui …"** + cakupan tahun (beranda & footer), dari `lib/dataMeta.ts`.
+- **Watchdog kesegaran data** terjadwal (GitHub Action) → buka/update issue saat data mungkin tertinggal.
+- Ringkasan kualitas "X/Y event ≥2 sumber" + badge keyakinan per event di timeline.
+
+### Beranda & navigasi
+- **Hero value-prop terlihat** (H1 nyata, sebelumnya `sr-only`).
+- **Feed "Akan ex-dividend"** (event resmi mendatang, menonjolkan **cum-date / "beli sebelum"**).
+- **Preset cepat** satu-klik; label kriptik "tct" → "terakhir"; kontras StatsBar diperbaiki.
+- **Command palette ⌘K** (cari emiten/halaman) + tombol cari di header; **PWA install prompt**.
+
+### Emiten
+- **Narasi unik** per emiten + blok **FAQ** terlihat + **schema FAQPage** (snippet SEO).
+- **Yield forward (FY terakhir)** + toggle **"setelah pajak 10%"** (PPh final).
+- Tombol **Bagikan** (Web Share/WA/X/salin) + CTA **Bandingkan**; perkiraan "≈N bulan lagi" + ref DPS.
+
+### SEO & konten
+- **Halaman kalender per bulan** `/kalender/[year]/[month]` (96 halaman, schema ItemList, OG kontekstual).
+- **/artikel** + 4 artikel evergreen (cum/ex-date, yield, pajak, memilih saham) + schema Article.
+- Sitemap diperluas (artikel + halaman bulan); **tabel data sr-only** untuk semua grafik.
+
+### Aksesibilitas
+- Kalender: warna Sabtu **dan** Minggu (fix bug hanya-Minggu), `aria-live` periode aktif.
+- MultiSelect → pola **listbox ARIA** + keyboard; heatmap sel kosong `aria-hidden`.
+- Footer: animasi **pause off-screen** + hormati `prefers-reduced-motion`.
+
+### Backend & reliability
+- `/api/price`: **fallback sumber kedua** + **cache last-good (stale)** + **rate-limit** + whitelist ticker.
+- **`/api/dividends`**: ekspor dataset publik (read-only, CORS) untuk developer.
+- **Watchlist via URL** (`?w=BBRI,PTBA`) untuk dibagikan/restore.
+
+### Kualitas & korektifitas
+- **Fix bug statistik bulan melingkar**: konsistensi & prediksi tak lagi salah menilai pembayar Des↔Jan.
+- **Util tanggal aman timezone** (`lib/date.ts`); **17 unit test** (Vitest) untuk logika turunan.
+- **Vercel Analytics** + event kustom; **CI** (check-data + test + lint + build); ESLint `next/core-web-vitals` clean.
+
+---
+
 ## 2026-06-18 — UI/UX overhaul + refresh data dividen (PR #4–#9)
 
 Perombakan tampilan menyeluruh menjadi aplikasi bergaya fintech modern

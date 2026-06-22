@@ -1,5 +1,6 @@
 import type { DividendEvent, Emiten } from "./types";
 import { bulanID } from "./format";
+import { parseISODate } from "./date";
 
 // ---------- helpers ----------
 
@@ -15,6 +16,49 @@ function stddev(nums: number[]): number {
   const mean = nums.reduce((a, b) => a + b, 0) / nums.length;
   const variance = nums.reduce((a, b) => a + (b - mean) ** 2, 0) / nums.length;
   return Math.sqrt(variance);
+}
+
+// ---------- statistik bulan melingkar (circular) ----------
+// Bulan itu siklik: Desember (11) & Januari (0) hanya berjarak 1 bulan, bukan 11.
+// Statistik linear biasa salah menilai pembayar yang mengangkangi pergantian tahun
+// sebagai "tidak teratur". Helper di bawah memetakan bulan ke sudut lingkaran.
+
+const TAU = Math.PI * 2;
+
+/** Rata-rata bulan melingkar (0–11, dibulatkan). */
+function circularMeanMonth(months: number[]): number {
+  if (months.length === 0) return 0;
+  let c = 0;
+  let s = 0;
+  for (const m of months) {
+    const a = (TAU * m) / 12;
+    c += Math.cos(a);
+    s += Math.sin(a);
+  }
+  const ang = Math.atan2(s / months.length, c / months.length);
+  const m = ((ang / TAU) * 12 + 12) % 12;
+  return Math.round(m) % 12;
+}
+
+/**
+ * Simpangan baku bulan dalam skala "bulan", tapi dihitung melingkar.
+ * 0 = selalu di bulan sama; makin besar = makin tersebar. Ambang tetap memakai
+ * skala bulan (≈0.8 / ≈1.8) seperti versi linear sebelumnya.
+ */
+function circularMonthStd(months: number[]): number {
+  if (months.length < 2) return 0;
+  let c = 0;
+  let s = 0;
+  for (const m of months) {
+    const a = (TAU * m) / 12;
+    c += Math.cos(a);
+    s += Math.sin(a);
+  }
+  c /= months.length;
+  s /= months.length;
+  const R = Math.min(1, Math.max(1e-9, Math.sqrt(c * c + s * s)));
+  const stdRad = Math.sqrt(-2 * Math.log(R)); // simpangan baku melingkar (radian)
+  return (stdRad * 12) / TAU; // konversi ke skala bulan
 }
 
 /** Tanggal acuan sebuah event: ex_date → cum_date → payment_date */
@@ -79,9 +123,9 @@ export type TimingConsistency =
 export function timingConsistency(events: DividendEvent[]): TimingConsistency {
   const finals = events.filter((e) => e.tipe === "final" && eventDate(e));
   const pool = finals.length >= 2 ? finals : events.filter((e) => eventDate(e));
-  const months = pool.map((e) => new Date(eventDate(e)!).getMonth());
+  const months = pool.map((e) => parseISODate(eventDate(e)!)!.getMonth());
   if (months.length < 2) return "Data kurang";
-  const sd = stddev(months);
+  const sd = circularMonthStd(months);
   if (sd <= 0.8) return "Sangat teratur";
   if (sd <= 1.8) return "Cukup teratur";
   return "Tidak teratur";
@@ -146,16 +190,22 @@ export function predictNext(
   for (const [tipe, arr] of byTipe) {
     const recent = arr.filter((e) => e.tahun >= today.getFullYear() - 5);
     if (recent.length < 1) continue;
-    const months = recent.map((e) => new Date(eventDate(e)!).getMonth());
-    const days = recent.map((e) => new Date(eventDate(e)!).getDate());
-    const m = Math.round(median(months));
-    const d = Math.round(median(days));
+    const dates = recent.map((e) => parseISODate(eventDate(e)!)!);
+    const months = dates.map((dt) => dt.getMonth());
+    const m = circularMeanMonth(months); // rata-rata bulan melingkar (aman Des↔Jan)
+    // hari: median hanya dari event di bulan rata-rata (±1) agar tak rata-rata
+    // antar bulan berbeda; fallback ke median semua bila kosong.
+    const monthDist = (a: number, b: number) =>
+      Math.min((a - b + 12) % 12, (b - a + 12) % 12);
+    const near = dates.filter((dt) => monthDist(dt.getMonth(), m) <= 1);
+    const dayPool = (near.length ? near : dates).map((dt) => dt.getDate());
+    const d = Math.round(median(dayPool));
 
     let year = today.getFullYear();
     let cand = new Date(year, m, Math.min(d || 15, 28));
     if (cand <= today) cand = new Date(year + 1, m, Math.min(d || 15, 28));
 
-    const sd = stddev(months);
+    const sd = circularMonthStd(months);
     const conf: Prediction["confidence"] =
       recent.length >= 3 && sd <= 1 ? "tinggi" : recent.length >= 2 && sd <= 2 ? "sedang" : "rendah";
 
@@ -226,6 +276,27 @@ export function payingStreak(events: DividendEvent[]): number {
   return streak;
 }
 
+/**
+ * Yield indikatif (forward) = total DPS tahun pembayaran terakhir ÷ harga terkini.
+ * Lebih stabil daripada TTM untuk pembayar tahunan (TTM bisa terbaca ~0 di celah
+ * antar pembayaran). Dipakai sebagai headline alternatif.
+ */
+export function indicativeYield(events: DividendEvent[], price: number | null): number | null {
+  if (!price || price <= 0) return null;
+  const la = latestAnnual(events);
+  if (!la || la.total <= 0) return null;
+  return (la.total / price) * 100;
+}
+
+/** Tarif PPh final dividen orang pribadi (PP 9/2021). */
+export const DIVIDEND_TAX_RATE = 0.1;
+
+/** Yield setelah pajak final 10% (bila tak direinvestasi). */
+export function afterTaxYield(yieldPct: number | null, rate: number = DIVIDEND_TAX_RATE): number | null {
+  if (yieldPct == null) return null;
+  return yieldPct * (1 - rate);
+}
+
 /** Bulan ex-date yang paling sering muncul (final diutamakan). */
 export function favoriteExMonth(events: DividendEvent[]): string | null {
   const finals = events.filter((e) => e.tipe === "final" && eventDate(e));
@@ -233,7 +304,7 @@ export function favoriteExMonth(events: DividendEvent[]): string | null {
   if (!pool.length) return null;
   const counts = new Map<number, number>();
   for (const e of pool) {
-    const m = new Date(eventDate(e)!).getMonth();
+    const m = parseISODate(eventDate(e)!)!.getMonth();
     counts.set(m, (counts.get(m) ?? 0) + 1);
   }
   let best = -1;

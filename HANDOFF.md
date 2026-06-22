@@ -26,6 +26,14 @@ Kalau kamu Claude yang baru melanjutkan proyek ini, lakukan urutan ini:
    URL per event**, dan **jangan pernah menebak angka** (pakai `null` + catatan di `notes`).
 5. Hanya menambah/mengubah **data** (`data/*.json`) untuk pekerjaan rutin — kode app (`lib/`,
    `components/`, `app/`) sudah generik dan **tidak perlu** diubah untuk menambah emiten/event.
+6. **Setiap kali data berubah, bump `DATA_UPDATED` di `lib/dataMeta.ts`** (tanggal yang tampil sebagai
+   badge "Data diperbarui"), lalu jalankan `npm run check-data` + `npm test`. Watchdog terjadwal
+   (`.github/workflows/data-watchdog.yml`) akan mengingatkan via issue bila data terindikasi basi.
+7. **Update 2026-06-22 (audit 360°):** ditambah feed "Akan ex-dividend", FAQ/narasi per emiten,
+   halaman kalender per bulan (`app/kalender/[year]/[month]`), `/artikel`, ⌘K, PWA install,
+   yield forward + toggle pajak, `/api/dividends`, fallback harga + rate-limit, analytics, CI + tes.
+   Logika `timingConsistency`/`predictNext` kini memakai **statistik bulan melingkar** (lihat
+   `lib/derive.ts` + `lib/derive.test.ts`). Lihat `CHANGELOG.md` 2026-06-22 untuk rincian.
 
 User adalah **non-coder** berbahasa Indonesia. Jelaskan langkah deploy secara klik-demi-klik bila perlu,
 dan tulis commit/PR dalam bahasa Indonesia (gaya commit yang sudah ada).

@@ -1,7 +1,7 @@
 /* Service worker Dividen IDX - dependency-free.
    Strategi: app shell di-precache, /api/* selalu jaringan (jangan cache harga/ics),
    navigasi network-first dengan fallback shell, aset statis stale-while-revalidate. */
-const CACHE = "dividen-idx-v1";
+const CACHE = "dividen-idx-v2";
 const SHELL = [
   "/",
   "/kalender",
@@ -10,6 +10,7 @@ const SHELL = [
   "/banding",
   "/panduan",
   "/istilah",
+  "/artikel",
 ];
 
 self.addEventListener("install", (event) => {

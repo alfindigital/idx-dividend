@@ -1,6 +1,8 @@
 import EmitenTable, { DashboardRow } from "@/components/EmitenTable";
 import StatsBar, { DashboardStats } from "@/components/StatsBar";
-import { emitenList, dividendList, getDividends } from "@/lib/data";
+import UpcomingDividends, { UpcomingItem } from "@/components/UpcomingDividends";
+import DataFreshness from "@/components/DataFreshness";
+import { emitenList, dividendList, getDividends, getEmiten } from "@/lib/data";
 import {
   latestAnnual,
   annualTotals,
@@ -12,6 +14,7 @@ import {
   sortByDateDesc,
   eventDate,
 } from "@/lib/derive";
+import { todayISO } from "@/lib/date";
 
 export const revalidate = 43200; // recompute prediksi ~12 jam sekali
 
@@ -45,7 +48,7 @@ export default function Page() {
   });
 
   // statistik ringkas untuk baris di atas tabel
-  const todayIso = new Date().toISOString().slice(0, 10);
+  const todayIso = todayISO();
   const cap = new Date();
   cap.setDate(cap.getDate() + 60);
   const capIso = cap.toISOString().slice(0, 10);
@@ -58,6 +61,22 @@ export default function Page() {
     }
   }
 
+  // feed "akan ex-dividend": event resmi yang belum lewat, urut terdekat
+  const upcoming: UpcomingItem[] = dividendList
+    .map((d) => ({ d, iso: eventDate(d) }))
+    .filter((x) => x.iso != null && x.iso >= todayIso)
+    .sort((a, b) => a.iso!.localeCompare(b.iso!))
+    .slice(0, 12)
+    .map(({ d }) => ({
+      ticker: d.ticker,
+      nama: getEmiten(d.ticker)?.nama ?? d.ticker,
+      tipe: d.tipe,
+      tahun: d.tahun,
+      cumDate: d.cum_date,
+      exDate: d.ex_date ?? d.cum_date ?? d.payment_date,
+      dps: d.dps_idr,
+    }));
+
   const stats: DashboardStats = {
     emiten: rows.length,
     events: dividendList.length,
@@ -68,8 +87,28 @@ export default function Page() {
   };
 
   return (
-    <div className="space-y-4">
-      <h1 className="sr-only">Data dividen saham IDX: history, yield, dan jadwal</h1>
+    <div className="space-y-6">
+      {/* hero — value-prop terlihat (sebelumnya hanya sr-only) */}
+      <section className="hero-glow space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-2.5 py-0.5 text-xs font-medium text-brand-strong">
+            {stats.emiten} emiten · {stats.events} event dividen
+          </span>
+          <DataFreshness />
+        </div>
+        <h1 className="max-w-3xl font-display text-2xl font-bold leading-tight tracking-tight text-fg sm:text-3xl">
+          Riwayat, yield & kalender dividen saham IDX dalam satu tempat
+        </h1>
+        <p className="max-w-2xl text-sm text-muted sm:text-base">
+          Pantau <strong className="font-semibold text-fg">yield berjalan</strong> dari harga terkini,
+          nilai <strong className="font-semibold text-fg">konsistensi & tren</strong> tiap emiten, dan
+          lihat <strong className="font-semibold text-fg">perkiraan jadwal</strong> dividen berikutnya —
+          gratis, tanpa daftar. Bukan saran investasi.
+        </p>
+      </section>
+
+      <UpcomingDividends items={upcoming} />
+
       <StatsBar stats={stats} />
       <EmitenTable rows={rows} />
     </div>
