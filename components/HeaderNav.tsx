@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarDays, Layers, Trophy, Columns, HelpCircle } from "./ui/icons";
+import { Home, CalendarDays, Layers, Trophy, Columns, HelpCircle, Search } from "./ui/icons";
 
 const base =
   "h-9 w-9 items-center justify-center rounded-md border transition";
@@ -25,6 +25,15 @@ export default function HeaderNav() {
 
   return (
     <>
+      <button
+        type="button"
+        aria-label="Cari emiten (Ctrl/⌘ K)"
+        title="Cari emiten (Ctrl/⌘ K)"
+        onClick={() => window.dispatchEvent(new Event("open-search"))}
+        className={`inline-flex ${base} ${tone(false)}`}
+      >
+        <Search size={18} />
+      </button>
       <Link
         href="/"
         aria-label="Beranda"

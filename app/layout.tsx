@@ -9,7 +9,12 @@ import SiteFooter from "@/components/SiteFooter";
 import TopProgress from "@/components/TopProgress";
 import ToastViewport from "@/components/ui/Toast";
 import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
+import InstallPrompt from "@/components/InstallPrompt";
+import CommandPalette from "@/components/CommandPalette";
+import DataFreshness from "@/components/DataFreshness";
+import { Analytics } from "@vercel/analytics/next";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
+import { emitenList } from "@/lib/data";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -136,9 +141,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="mx-auto max-w-[1600px] px-4 pt-6 pb-[calc(env(safe-area-inset-bottom)+5rem)] sm:pb-6">
           {children}
         </main>
+        <div className="mx-auto max-w-[1600px] px-4">
+          <DataFreshness compact className="border-t border-line/60 pt-3" />
+        </div>
         <SiteFooter />
         <BottomNav />
         <ToastViewport />
+        <InstallPrompt />
+        <CommandPalette
+          items={emitenList.map((e) => ({ ticker: e.ticker, nama: e.nama, sektor: e.sektor }))}
+        />
+        <Analytics />
       </body>
     </html>
   );

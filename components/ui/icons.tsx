@@ -242,6 +242,28 @@ export const SlidersHorizontal = (p: IconProps) => (
   </Svg>
 );
 
+export const Share2 = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
+  </Svg>
+);
+
+export const Link2 = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M8 12h8" />
+  </Svg>
+);
+
+export const Smartphone = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="5" y="2" width="14" height="20" rx="2.5" />
+    <path d="M11 18h2" />
+  </Svg>
+);
+
 export const Star = ({ size = 18, filled = false, ...props }: IconProps & { filled?: boolean }) => (
   <svg
     width={size}
